@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -30,14 +32,14 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotEmpty(message = "Name require")
-    @Size(max = 50, message = "Name cannot more than 50 characters")
+    @NotEmpty(message = "Name required")
+    @Size(max = 50, message = "Name cannot be more than 50 characters")
     @Column(nullable = false, length = 50)
     private String name;
 
-    @NotEmpty(message = "Email Required")
+    @NotEmpty(message = "Email required")
     @Email(message = "Enter valid email")
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @NotEmpty(message = "Phone number is required")
@@ -45,7 +47,7 @@ public class User {
             regexp = "^05\\d{8}$",
             message = "Phone number must be a valid Saudi number starting with 05"
     )
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, unique = true, length = 10)
     private String phoneNumber;
 
     @NotEmpty(message = "Password is required")
@@ -56,4 +58,10 @@ public class User {
     )
     @Column(nullable = false)
     private String password;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<Vehicle> vehicles;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<Notification> notifications;
 }

@@ -1,5 +1,6 @@
 package com.nawaf.capstone3.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -29,10 +30,15 @@ public class KilometerRecord {
     private Integer kilometers;
 
     @Size(max = 200, message = "Note cannot be more than 200 characters")
-    @Column
+    @Column(length = 200)
     private String note;
 
     @CreationTimestamp
-    @Column(updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime recordedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "vehicle_id", nullable = false)
+    @JsonIgnore
+    private Vehicle vehicle;
 }

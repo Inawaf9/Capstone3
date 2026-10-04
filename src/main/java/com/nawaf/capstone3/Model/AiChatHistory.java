@@ -1,5 +1,6 @@
 package com.nawaf.capstone3.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -22,16 +23,21 @@ public class AiChatHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotEmpty(message = "User message require")
-    @Size(max = 200, message = "User message cannot more than 200 characters")
+    @NotEmpty(message = "User message required")
+    @Size(max = 200, message = "User message cannot be more than 200 characters")
     @Column(nullable = false, length = 200)
     private String userMessage;
 
-    @NotEmpty(message = "Ai response required")
-    @Column(nullable = false)
+    @NotEmpty(message = "AI response required")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String aiResponse;
 
     @CreationTimestamp
-    @Column(updatable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "vehicle_id", nullable = false)
+    @JsonIgnore
+    private Vehicle vehicle;
 }

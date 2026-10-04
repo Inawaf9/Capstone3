@@ -1,42 +1,51 @@
+package com.nawaf.capstone3.Model;
 
-        package com.nawaf.capstone3.Model;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 public class Receipt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "int")
     private Integer id;
 
     @NotBlank(message = "Receipt file URL is required")
     @Size(max = 2048, message = "Receipt file URL is too long")
-    @Column(columnDefinition = "varchar(2048) not null")
+    @Column(nullable = false, length = 2048)
     private String fileUrl;
 
     @NotNull(message = "Total amount is required")
     @PositiveOrZero(message = "Total amount cannot be negative")
-    @Column(columnDefinition = "double not null")
+    @Column(nullable = false)
     private Double totalAmount;
 
     @NotNull(message = "Receipt date is required")
-    @Column(columnDefinition = "date not null")
+    @Column(nullable = false)
     private LocalDate extractedDate;
 
     @CreationTimestamp
-    @Column(updatable = false)
-    private LocalDate uploadedAt;
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime uploadedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "maintenance_record_id", nullable = false)
+    @JsonIgnore
+    private MaintenanceRecord maintenanceRecord;
 }
