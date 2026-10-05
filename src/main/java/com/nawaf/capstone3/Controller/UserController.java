@@ -1,5 +1,6 @@
 package com.nawaf.capstone3.Controller;
 
+import com.nawaf.capstone3.Api.ApiResponse;
 import com.nawaf.capstone3.Model.User;
 import com.nawaf.capstone3.Service.UserService;
 import jakarta.validation.Valid;
@@ -17,37 +18,33 @@ public class UserController {
     private final UserService userService;
 
 
-    // Get all users
     @GetMapping("/get")
     public ResponseEntity<?> getAllUser() {
         return ResponseEntity.status(200).body(userService.getAllUser());
     }
 
 
-    // Add user
     @PostMapping("/add")
     public ResponseEntity<?> addUser(@Valid @RequestBody User user) {
         userService.addUser(user);
-        return ResponseEntity.status(200).body(" add successfully");
+        return ResponseEntity.status(200).body(new ApiResponse("User add successfully"));
     }
 
 
-    // Update user
     @PutMapping("/update/{userId}")
     public ResponseEntity<?> update(
             @PathVariable Integer userId,
             @Valid @RequestBody User updateUser) {
 
         userService.update(userId, updateUser);
-        return ResponseEntity.status(200).body("update successfully");
+        return ResponseEntity.status(200).body(new ApiResponse("User update successfully"));
     }
 
 
-    // Delete user
     @DeleteMapping("/delete/{userId}")
     public ResponseEntity<?> delete(@PathVariable Integer userId) {
 
         userService.delete(userId);
-        return ResponseEntity.status(200).body("delete successfully");
+        return ResponseEntity.status(200).body(new ApiResponse("User delete successfully"));
     }
 }

@@ -1,5 +1,6 @@
 package com.nawaf.capstone3.Controller;
 
+import com.nawaf.capstone3.Api.ApiResponse;
 import com.nawaf.capstone3.Model.Vehicle;
 import com.nawaf.capstone3.Service.VehicleService;
 import jakarta.validation.Valid;
@@ -37,15 +38,15 @@ public class VehicleController {
 
         vehicleService.addVehicle(userId, vehicle);
 
-        return ResponseEntity.status(200).body("add successfully");
+        return ResponseEntity.status(200).body(new ApiResponse("Vehicle add successfully"));
     }
 
 
     @PutMapping("/update/{userId}/{vehicleId}")
-    public ResponseEntity<?> updateVehicle(@PathVariable Integer userId, @PathVariable Integer vehicleId,@RequestBody Vehicle updateVehicle) {
+    public ResponseEntity<?> updateVehicle(@PathVariable Integer userId, @PathVariable Integer vehicleId,@RequestBody @Valid Vehicle updateVehicle) {
 
         vehicleService.updateVehicle(userId, vehicleId, updateVehicle);
-        return ResponseEntity.status(200).body("add successfully");
+        return ResponseEntity.status(200).body(new ApiResponse("Vehicle update successfully"));
     }
 
 
@@ -53,6 +54,6 @@ public class VehicleController {
     @DeleteMapping("/delete/{userId}/{vehicleId}")
     public ResponseEntity<?> delete(@PathVariable Integer userId, @PathVariable Integer vehicleId) {
         vehicleService.delete(userId, vehicleId);
-        return ResponseEntity.status(200).body(" delete successfully");
+        return ResponseEntity.status(200).body(new ApiResponse(" Vehicle delete successfully"));
     }
 }

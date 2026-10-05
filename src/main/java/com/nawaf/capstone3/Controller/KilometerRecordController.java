@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/kilometer-record")
@@ -25,28 +24,39 @@ public class KilometerRecordController {
 
 
     // Add kilometer record to a vehicle
-    @PostMapping("/add/{vehicleId}")
-    public ResponseEntity<?> add(@PathVariable Integer vehicleId, @Valid @RequestBody KilometerRecord kilometerRecord) {
+    @PostMapping("/add/{userId}/{vehicleId}")
+    public ResponseEntity<?> add(
+            @PathVariable Integer userId,
+            @PathVariable Integer vehicleId,
+            @Valid @RequestBody KilometerRecord kilometerRecord) {
 
-        kilometerRecordService.add(vehicleId, kilometerRecord);
-
-        return ResponseEntity.status(200).body("add successfully");
+        kilometerRecordService.add(userId, vehicleId, kilometerRecord);
+        return ResponseEntity.status(200).body(" KilometerRecord Add successfully");
     }
 
 
-    @PutMapping("/update/{kilometerRecordId}")
-    public ResponseEntity<?> update(@PathVariable Integer kilometerRecordId, @Valid @RequestBody KilometerRecord updateKilometerRecord) {
+        @PutMapping("/update/{userId}/{vehicleId}/{kilometerRecordId}")
+    public ResponseEntity<?> update(
+            @PathVariable Integer userId,
+            @PathVariable Integer vehicleId,
+            @PathVariable Integer kilometerRecordId,
+            @Valid @RequestBody KilometerRecord updateKilometerRecord) {
 
-        kilometerRecordService.update(kilometerRecordId, updateKilometerRecord);
-        return ResponseEntity.ok().body("update successfully");
+        kilometerRecordService.update(
+                userId,
+                vehicleId,
+                kilometerRecordId,
+                updateKilometerRecord
+        );
+
+        return ResponseEntity.status(200).body("kilometerRecord update successfully");
     }
 
 
-    @DeleteMapping("/delete/{kilometerRecordId}")
-    public ResponseEntity<?> delete(@PathVariable Integer kilometerRecordId) {
+    @DeleteMapping("/delete/{userId}/{vehicleId}/{kilometerRecordId}")
+    public ResponseEntity<?> delete(@PathVariable Integer userId, @PathVariable Integer vehicleId, @PathVariable Integer kilometerRecordId) {
 
-        kilometerRecordService.delete(kilometerRecordId);
-
-        return ResponseEntity.status(200).body(" delete successfully");
+        kilometerRecordService.delete(userId,vehicleId,kilometerRecordId);
+        return ResponseEntity.status(200).body(" kilometerRecord delete successfully");
     }
 }

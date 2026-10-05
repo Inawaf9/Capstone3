@@ -23,6 +23,13 @@ public class UserService {
 
 
     public void addUser(User user){
+
+        if (userRepository.findUsersByEmail(user.getEmail())!= null) {
+            throw new ApiException("Email already exists");
+        }
+        if (userRepository.findUsersByPhoneNumber(user.getPhoneNumber()) != null) {
+            throw new ApiException("Phone number already exists");
+        }
         userRepository.save(user);
     }
 
@@ -33,8 +40,20 @@ public class UserService {
         if(user ==null){
             throw new ApiException("User not found ");
         }
+
+        User emailUser=userRepository.findUsersByEmail(updateUser.getEmail());
+         if(emailUser!=null&&!emailUser.getId().equals(userId)){
+             throw new ApiException("Email already exists");
+        }
+
+        User phoneUser=userRepository.findUsersByPhoneNumber(updateUser.getPhoneNumber());
+        if(phoneUser!=null&&!phoneUser.getId().equals(userId)){
+            throw new ApiException("Phone number already exists");
+        }
+
         user.setName(updateUser.getName());
         user.setPassword(updateUser.getPassword());
+        user.setEmail(updateUser.getEmail());
         user.setPhoneNumber(updateUser.getPhoneNumber());
         userRepository.save(user);
     }

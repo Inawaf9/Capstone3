@@ -42,6 +42,12 @@ public class VehicleService {
         if(user==null){
             throw new ApiException("User not found");
         }
+
+        Vehicle existingVehicle = vehicleRepository.findVehicleByVin(vehicle.getVin());
+        if(existingVehicle!=null){
+            throw new ApiException("VIN already exists");
+        }
+
         vehicle.setUser(user);
         vehicleRepository.save(vehicle);
     }
@@ -54,9 +60,15 @@ public class VehicleService {
             throw new ApiException("user not found");
         }
 
-        Vehicle vehicle=vehicleRepository.findVehicleById(vehicleId);
-        if(vehicle==null){
-            throw new ApiException("vehicle not found");
+        // Check that the vehicle belongs to the user before updating it
+        Vehicle vehicle = vehicleRepository.findVehicleByIdAndUser(vehicleId, user);
+        if (vehicle == null) {
+            throw new ApiException("Vehicle not found or does not belong to this user");
+        }
+
+        Vehicle vehicleVin=vehicleRepository.findVehicleByVin(updateVehicle.getVin());
+        if(vehicleVin!=null&&!vehicleVin.getId().equals(vehicleId)){
+            throw new ApiException("VIN already exists");
         }
 
         vehicle.setVin(updateVehicle.getVin());
@@ -75,7 +87,6 @@ public class VehicleService {
         if(user==null){
             throw new ApiException("user not found");
         }
-
         // Check that the vehicle belongs to the user before deleting it
         Vehicle vehicle=vehicleRepository.findVehicleByIdAndUser(vehicleId,user);
           if(vehicle==null){

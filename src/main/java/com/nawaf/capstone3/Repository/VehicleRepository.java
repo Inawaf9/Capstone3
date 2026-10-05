@@ -11,6 +11,7 @@ import java.util.List;
 public interface VehicleRepository extends JpaRepository<Vehicle,Integer> {
     Vehicle findVehicleById(Integer id );
     Vehicle findVehicleByIdAndUser(Integer vehicleId, User user);
+    Vehicle findVehicleByVin(String vin);
 
     List<Vehicle> findVehicleByUser(User user);
 }
