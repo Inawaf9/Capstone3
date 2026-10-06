@@ -9,5 +9,6 @@ import org.springframework.stereotype.Repository;
 public interface KilometerRecordRepository extends JpaRepository<KilometerRecord ,Integer> {
 
     KilometerRecord findKilometerRecordById(Integer id);
+    KilometerRecord findKilometerRecordByIdAndVehicle(Integer kilometerRecordId , Vehicle vehicle);
 
 }
