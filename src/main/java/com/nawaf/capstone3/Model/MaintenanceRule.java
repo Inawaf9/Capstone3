@@ -61,6 +61,8 @@ public class MaintenanceRule {
     private UserManual userManual;
 
     @OneToMany(mappedBy = "maintenanceRule")
-    @JsonIgnore
+    @JsonIgnore//هيصير تكرار لانهائي لو حذفناها داخل تحليل ال Ai
     private Set<MaintenanceRecord> maintenanceRecords;
+
+
 }

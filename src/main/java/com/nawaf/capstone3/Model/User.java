@@ -1,6 +1,7 @@
 package com.nawaf.capstone3.Model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -58,7 +59,9 @@ public class User {
             message = "Password must contain uppercase, lowercase, number, and special character"
     )
     @Column(nullable = false)
-    @JsonIgnore
+//    @JsonIgnore ماضبط التيست بالبوست مان لما اضفناها
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
