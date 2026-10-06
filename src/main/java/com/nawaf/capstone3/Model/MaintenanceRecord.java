@@ -57,8 +57,10 @@ public class MaintenanceRecord {
     private MaintenanceRule maintenanceRule;
 
     @OneToMany(mappedBy = "maintenanceRecord", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<Receipt> receipts;
 
     @OneToMany(mappedBy = "maintenanceRecord", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<Notification> notifications;
 }

@@ -22,7 +22,7 @@ public class ReceiptService {
     private final MaintenanceRecordRepository maintenanceRecordRepository;
     private final VehicleRepository vehicleRepository;
 
-    public List<Receipt> getAllReceipts() {
+    public List<Receipt> getReceipts() {
         return receiptRepository.findAll();
     }
 
@@ -44,18 +44,22 @@ public class ReceiptService {
         receiptRepository.save(receipt);
     }
 
-    public void updateReceipt(Integer id, Receipt receipt) {
-        Receipt oldReceipt = getReceiptById(id);
+    public void updateReceipt(Integer id, Receipt updateReceipt) {
+        Receipt receipt = receiptRepository.findReceiptById(id);
 
-        oldReceipt.setFileUrl(receipt.getFileUrl());
-        oldReceipt.setTotalAmount(receipt.getTotalAmount());
-        oldReceipt.setExtractedDate(receipt.getExtractedDate());
+        if (receipt == null) throw new ApiException("Receipt not found");
 
-        receiptRepository.save(oldReceipt);
+        receipt.setFileUrl(updateReceipt.getFileUrl());
+        receipt.setTotalAmount(updateReceipt.getTotalAmount());
+        receipt.setExtractedDate(updateReceipt.getExtractedDate());
+
+        receiptRepository.save(receipt);
     }
 
     public void deleteReceipt(Integer id) {
-        Receipt receipt = getReceiptById(id);
+        Receipt receipt = receiptRepository.findReceiptById(id);
+
+        if (receipt == null) throw new ApiException("Receipt not found");
 
         receiptRepository.delete(receipt);
     }

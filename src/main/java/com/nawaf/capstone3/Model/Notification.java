@@ -57,7 +57,7 @@ public class Notification {
     @Column(nullable = false, length = 10)
     private String channel;
 
-    @NotEmpty(message = "Message required")
+    @NotEmpty(message = "Message is required")
     @Size(max = 500, message = "Message cannot be more than 500 characters")
     @Column(nullable = false, length = 500)
     private String message;

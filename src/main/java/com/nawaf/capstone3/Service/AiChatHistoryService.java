@@ -17,12 +17,12 @@ public class AiChatHistoryService {
     private final AiChatHistoryRepository aiChatHistoryRepository;
     private final VehicleRepository vehicleRepository;
 
-    public List<AiChatHistory> getAllAiChatHistories() {
+    public List<AiChatHistory> getAiChatHistories() {
         return aiChatHistoryRepository.findAll();
     }
 
     public AiChatHistory getAiChatHistoryById(Integer id) {
-        AiChatHistory aiChatHistory = aiChatHistoryRepository.findAiChatHistoriesById(id);
+        AiChatHistory aiChatHistory = aiChatHistoryRepository.findAiChatHistoryById(id);
 
         if (aiChatHistory == null) throw new ApiException("AI chat history not found");
 
@@ -30,7 +30,6 @@ public class AiChatHistoryService {
     }
 
     public void addAiChatHistory(Integer vehicleId, AiChatHistory aiChatHistory) {
-
         Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
 
         if (vehicle == null) throw new ApiException("Vehicle not found");
@@ -40,19 +39,21 @@ public class AiChatHistoryService {
         aiChatHistoryRepository.save(aiChatHistory);
     }
 
-    public void updateAiChatHistory(Integer id, AiChatHistory aiChatHistory) {
+    public void updateAiChatHistory(Integer id, AiChatHistory updateAiChatHistory) {
+        AiChatHistory aiChatHistory = aiChatHistoryRepository.findAiChatHistoryById(id);
 
-        AiChatHistory oldAiChatHistory = getAiChatHistoryById(id);
+        if (aiChatHistory == null) throw new ApiException("AI chat history not found");
 
-        oldAiChatHistory.setUserMessage(aiChatHistory.getUserMessage());
-        oldAiChatHistory.setAiResponse(aiChatHistory.getAiResponse());
+        aiChatHistory.setUserMessage(updateAiChatHistory.getUserMessage());
+        aiChatHistory.setAiResponse(updateAiChatHistory.getAiResponse());
 
-        aiChatHistoryRepository.save(oldAiChatHistory);
+        aiChatHistoryRepository.save(aiChatHistory);
     }
 
     public void deleteAiChatHistory(Integer id) {
+        AiChatHistory aiChatHistory = aiChatHistoryRepository.findAiChatHistoryById(id);
 
-        AiChatHistory aiChatHistory = getAiChatHistoryById(id);
+        if (aiChatHistory == null) throw new ApiException("AI chat history not found");
 
         aiChatHistoryRepository.delete(aiChatHistory);
     }

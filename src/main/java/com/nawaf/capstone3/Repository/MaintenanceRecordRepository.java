@@ -10,7 +10,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MaintenanceRecordRepository extends JpaRepository<MaintenanceRecord,Integer> {
+public interface MaintenanceRecordRepository extends JpaRepository<MaintenanceRecord, Integer> {
+
     MaintenanceRecord findMaintenanceRecordById(Integer id);
     List<MaintenanceRecord> findMaintenanceRecordByVehicle(Vehicle vehicle);
 

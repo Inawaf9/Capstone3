@@ -28,18 +28,18 @@ public class Vehicle {
     @Column(length = 17, unique = true)
     private String vin;
 
-    @NotEmpty(message = "Make required")
+    @NotEmpty(message = "Make is required")
     @Size(max = 50, message = "Make cannot be more than 50 characters")
     @Column(nullable = false, length = 50)
     private String make;
 
-    @NotEmpty(message = "Model required")
+    @NotEmpty(message = "Model is required")
     @Size(max = 50, message = "Model cannot be more than 50 characters")
     @Column(nullable = false, length = 50)
     private String model;
 
-    @NotNull(message = "Year required")
-    @Positive(message = "Year must be positive number")
+    @NotNull(message = "Year is required")
+    @Positive(message = "Year must be a positive number")
     @Column(nullable = false)
     private Integer year;
 
@@ -60,14 +60,18 @@ public class Vehicle {
     private User user;
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<KilometerRecord> kilometerRecords;
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<AiChatHistory> aiChatHistories;
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<MaintenanceRecord> maintenanceRecords;
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<UserManual> userManuals;
 }

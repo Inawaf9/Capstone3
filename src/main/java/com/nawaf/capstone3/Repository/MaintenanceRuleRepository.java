@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MaintenanceRuleRepository extends JpaRepository<MaintenanceRule,Integer> {
+public interface MaintenanceRuleRepository extends JpaRepository<MaintenanceRule, Integer> {
 
     MaintenanceRule findMaintenanceRuleById(Integer id);
     List<MaintenanceRule> findMaintenanceRuleByUserManual_Vehicle(Vehicle vehicle);

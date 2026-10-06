@@ -16,8 +16,8 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping("/get-all")
-    public ResponseEntity<?> getAllNotifications() {
-        return ResponseEntity.status(200).body(notificationService.getAllNotifications());
+    public ResponseEntity<?> getNotifications() {
+        return ResponseEntity.status(200).body(notificationService.getNotifications());
     }
 
     @GetMapping("/get/{id}")
@@ -25,27 +25,21 @@ public class NotificationController {
         return ResponseEntity.status(200).body(notificationService.getNotificationById(id));
     }
 
-
     @PostMapping("/add/{userId}")
     public ResponseEntity<?> addNotification(@PathVariable Integer userId, @Valid @RequestBody Notification notification) {
         notificationService.addNotification(userId, notification);
-
         return ResponseEntity.status(201).body(new ApiResponse("Notification added successfully"));
     }
-
 
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateNotification(@PathVariable Integer id, @Valid @RequestBody Notification notification) {
         notificationService.updateNotification(id, notification);
-
         return ResponseEntity.status(200).body(new ApiResponse("Notification updated successfully"));
     }
-
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteNotification(@PathVariable Integer id) {
         notificationService.deleteNotification(id);
-
         return ResponseEntity.status(200).body(new ApiResponse("Notification deleted successfully"));
     }
 

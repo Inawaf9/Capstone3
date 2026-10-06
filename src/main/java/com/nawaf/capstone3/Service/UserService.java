@@ -14,56 +14,52 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-
-
-
-    public List<User>getAllUser(){
+    public List<User> getUsers() {
         return userRepository.findAll();
     }
 
+    public User getUserById(Integer id) {
+        User user = userRepository.findUserById(id);
 
-    public void addUser(User user){
+        if (user == null) throw new ApiException("User not found");
 
-        if (userRepository.findUsersByEmail(user.getEmail())!= null) {
-            throw new ApiException("Email already exists");
-        }
-        if (userRepository.findUsersByPhoneNumber(user.getPhoneNumber()) != null) {
-            throw new ApiException("Phone number already exists");
-        }
+        return user;
+    }
+
+    public void addUser(User user) {
+        User emailUser = userRepository.findUserByEmail(user.getEmail());
+        User phoneUser = userRepository.findUserByPhoneNumber(user.getPhoneNumber());
+
+        if (emailUser != null) throw new ApiException("Email already exists");
+        if (phoneUser != null) throw new ApiException("Phone number already exists");
+
         userRepository.save(user);
     }
 
+    public void updateUser(Integer id, User updateUser) {
+        User user = userRepository.findUserById(id);
 
-    public void  update(Integer userId,User updateUser){
-        User user=userRepository.findUsersById(userId);
+        if (user == null) throw new ApiException("User not found");
 
-        if(user ==null){
-            throw new ApiException("User not found ");
-        }
+        User emailUser = userRepository.findUserByEmail(updateUser.getEmail());
+        User phoneUser = userRepository.findUserByPhoneNumber(updateUser.getPhoneNumber());
 
-        User emailUser=userRepository.findUsersByEmail(updateUser.getEmail());
-         if(emailUser!=null&&!emailUser.getId().equals(userId)){
-             throw new ApiException("Email already exists");
-        }
-
-        User phoneUser=userRepository.findUsersByPhoneNumber(updateUser.getPhoneNumber());
-        if(phoneUser!=null&&!phoneUser.getId().equals(userId)){
-            throw new ApiException("Phone number already exists");
-        }
+        if (emailUser != null && !emailUser.getId().equals(id)) throw new ApiException("Email already exists");
+        if (phoneUser != null && !phoneUser.getId().equals(id)) throw new ApiException("Phone number already exists");
 
         user.setName(updateUser.getName());
-        user.setPassword(updateUser.getPassword());
         user.setEmail(updateUser.getEmail());
         user.setPhoneNumber(updateUser.getPhoneNumber());
+        user.setPassword(updateUser.getPassword());
+
         userRepository.save(user);
     }
 
+    public void deleteUser(Integer id) {
+        User user = userRepository.findUserById(id);
 
-    public void delete(Integer userId){
-        User user=userRepository.findUsersById(userId);
-        if(user ==null){
-            throw new ApiException("User not found ");
-        }
+        if (user == null) throw new ApiException("User not found");
+
         userRepository.delete(user);
     }
 }

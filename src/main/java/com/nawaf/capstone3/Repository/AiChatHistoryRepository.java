@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AiChatHistoryRepository extends JpaRepository<AiChatHistory, Integer> {
 
-    AiChatHistory findAiChatHistoriesById(Integer id);
+    AiChatHistory findAiChatHistoryById(Integer id);
 }
