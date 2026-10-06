@@ -1,0 +1,53 @@
+package com.nawaf.capstone3.Service;
+
+import com.nawaf.capstone3.Api.ApiException;
+import com.nawaf.capstone3.Model.UserManual;
+import com.nawaf.capstone3.Model.Vehicle;
+import com.nawaf.capstone3.Repository.UserManualRepository;
+import com.nawaf.capstone3.Repository.VehicleRepository;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@AllArgsConstructor
+public class UserManualService {
+    private final UserManualRepository userManualRepository;
+    private final VehicleRepository vehicleRepository;
+
+      public List<UserManual> getAll(){
+          return userManualRepository.findAll();
+      }
+     //تحققنا من ان اي دي الخاص بالمركبة موجود وبعدها تم الربط
+      public void addUserManual(UserManual userManual){
+          Vehicle vehicle=vehicleRepository.findVehicleById(userManual.getVehicle().getId());
+          if(vehicle==null){
+              throw new ApiException("vehicle id not found ");
+          }
+          userManualRepository.save(userManual);
+      }
+      //نتناقش ايش لازم نعدل واذا التعديلات الثانية لازمها اند بوينت مختلفة
+      public void updateUserManual(Integer userManualId, UserManual userManual){
+          UserManual oldUserManual=userManualRepository.findUserManualById(userManualId);
+          if(oldUserManual==null){
+              throw new ApiException("userManual id not found ");
+          }
+          oldUserManual.setFileUrl(userManual.getFileUrl());
+          oldUserManual.setMaintenanceRules(userManual.getMaintenanceRules());
+          oldUserManual.setStatus(userManual.getStatus());
+          oldUserManual.setVehicle(userManual.getVehicle());
+          userManual.setUploadedAt(userManual.getUploadedAt());
+
+            userManualRepository.save(oldUserManual);
+      }
+
+      public void deleteUserManual(Integer userManualId){
+          UserManual oldUserManual=userManualRepository.findUserManualById(userManualId);
+          if(oldUserManual==null){
+              throw new ApiException("user id not found , can not be deleted");
+          }
+          userManualRepository.deleteById(userManualId);
+      }
+}
