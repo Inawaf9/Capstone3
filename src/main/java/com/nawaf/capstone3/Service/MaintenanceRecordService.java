@@ -68,4 +68,14 @@ public class MaintenanceRecordService {
         }
         maintenanceRecordRepository.deleteById(maintenanceId);
     }
+
+
+
+    public Double getMaintenanceCostByYear(Integer vehicleId ,Integer year){
+        Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
+        if (vehicle == null) {
+            throw new ApiException("Vehicle not found");
+        }
+        return maintenanceRecordRepository.getTotalCostByVehicleAndYear(vehicleId,year);
+    }
 }

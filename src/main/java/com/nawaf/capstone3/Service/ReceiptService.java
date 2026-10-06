@@ -1,13 +1,17 @@
 package com.nawaf.capstone3.Service;
 
 import com.nawaf.capstone3.Api.ApiException;
+import com.nawaf.capstone3.DTO.ReceiptDTO;
 import com.nawaf.capstone3.Model.MaintenanceRecord;
 import com.nawaf.capstone3.Model.Receipt;
+import com.nawaf.capstone3.Model.Vehicle;
 import com.nawaf.capstone3.Repository.MaintenanceRecordRepository;
 import com.nawaf.capstone3.Repository.ReceiptRepository;
+import com.nawaf.capstone3.Repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,6 +20,7 @@ public class ReceiptService {
 
     private final ReceiptRepository receiptRepository;
     private final MaintenanceRecordRepository maintenanceRecordRepository;
+    private final VehicleRepository vehicleRepository;
 
     public List<Receipt> getAllReceipts() {
         return receiptRepository.findAll();
@@ -53,5 +58,39 @@ public class ReceiptService {
         Receipt receipt = getReceiptById(id);
 
         receiptRepository.delete(receipt);
+    }
+
+
+
+    public List<ReceiptDTO>getAllReceiptForVehicle(Integer vehicleId){
+        Vehicle vehicle=vehicleRepository.findVehicleById(vehicleId);
+
+        if(vehicle==null){
+            throw new ApiException("Vehicle not found");
+        }
+        List<Receipt>receipts=receiptRepository.findReceiptsByMaintenanceRecord_Vehicle_Id(vehicleId);
+
+        List<ReceiptDTO>receiptDTOS=new ArrayList<>();
+        for (Receipt receipt:receipts){
+            ReceiptDTO dto=new ReceiptDTO(
+            receipt.getFileUrl(),
+            receipt.getTotalAmount(),
+            receipt.getExtractedDate(),
+            receipt.getMaintenanceRecord().getMaintenanceRule().getServiceName()
+            );
+            receiptDTOS.add(dto);
+        }
+     return receiptDTOS;
+    }
+
+
+    public Double getTotalReceiptAmountByVehicleId(Integer vehicleId){
+
+        Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
+        if (vehicle == null) {
+            throw new ApiException("Vehicle not found");
+        }
+
+      return receiptRepository.getTotalAmountByVehicleId(vehicleId);
     }
 }

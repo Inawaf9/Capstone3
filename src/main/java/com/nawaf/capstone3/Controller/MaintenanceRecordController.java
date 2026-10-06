@@ -37,4 +37,9 @@ public class MaintenanceRecordController {
         maintenanceRecordService.updateMaintenanceRecord(maintenanceRecordId,maintenanceRecord);
         return ResponseEntity.status(200).body(new ApiResponse("updated done "));
     }
+
+    @GetMapping("/cost/{vehicleId}/{year}")
+    public ResponseEntity<?>getMaintenanceCostByYear(@PathVariable Integer vehicleId ,@PathVariable Integer year){
+        return ResponseEntity.status(200).body(maintenanceRecordService.getMaintenanceCostByYear(vehicleId,year));
+    }
 }

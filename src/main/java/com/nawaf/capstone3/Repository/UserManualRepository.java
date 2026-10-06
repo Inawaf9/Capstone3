@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserManualRepository extends JpaRepository<UserManual,Integer> {
     UserManual findUserManualById(Integer id);
+    UserManual findTopByVehicleIdOrderByUploadedAtAsc(Integer vehicleId);
 }
