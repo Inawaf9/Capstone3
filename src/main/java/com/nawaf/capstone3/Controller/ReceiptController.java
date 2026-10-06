@@ -16,8 +16,8 @@ public class ReceiptController {
     private final ReceiptService receiptService;
 
     @GetMapping("/get-all")
-    public ResponseEntity<?> getAllReceipts() {
-        return ResponseEntity.status(200).body(receiptService.getAllReceipts());
+    public ResponseEntity<?> getReceipts() {
+        return ResponseEntity.status(200).body(receiptService.getReceipts());
     }
 
     @GetMapping("/get/{id}")
@@ -28,21 +28,18 @@ public class ReceiptController {
     @PostMapping("/add/{maintenanceRecordId}")
     public ResponseEntity<?> addReceipt(@PathVariable Integer maintenanceRecordId, @Valid @RequestBody Receipt receipt) {
         receiptService.addReceipt(maintenanceRecordId, receipt);
-
         return ResponseEntity.status(201).body(new ApiResponse("Receipt added successfully"));
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateReceipt(@PathVariable Integer id, @Valid @RequestBody Receipt receipt) {
         receiptService.updateReceipt(id, receipt);
-
         return ResponseEntity.status(200).body(new ApiResponse("Receipt updated successfully"));
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteReceipt(@PathVariable Integer id) {
         receiptService.deleteReceipt(id);
-
         return ResponseEntity.status(200).body(new ApiResponse("Receipt deleted successfully"));
     }
 }

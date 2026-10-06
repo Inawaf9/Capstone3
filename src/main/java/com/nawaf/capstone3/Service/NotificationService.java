@@ -17,7 +17,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
 
-    public List<Notification> getAllNotifications() {
+    public List<Notification> getNotifications() {
         return notificationRepository.findAll();
     }
 
@@ -35,24 +35,29 @@ public class NotificationService {
         if (user == null) throw new ApiException("User not found");
 
         notification.setUser(user);
+        notification.setStatus("PENDING");
 
         notificationRepository.save(notification);
     }
 
-    public void updateNotification(Integer id, Notification notification) {
-        Notification oldNotification = getNotificationById(id);
+    public void updateNotification(Integer id, Notification updateNotification) {
+        Notification notification = notificationRepository.findNotificationById(id);
 
-        oldNotification.setType(notification.getType());
-        oldNotification.setChannel(notification.getChannel());
-        oldNotification.setMessage(notification.getMessage());
-        oldNotification.setStatus(notification.getStatus());
-        oldNotification.setSentAt(notification.getSentAt());
+        if (notification == null) throw new ApiException("Notification not found");
 
-        notificationRepository.save(oldNotification);
+        notification.setType(updateNotification.getType());
+        notification.setChannel(updateNotification.getChannel());
+        notification.setMessage(updateNotification.getMessage());
+        notification.setStatus(updateNotification.getStatus());
+        notification.setSentAt(updateNotification.getSentAt());
+
+        notificationRepository.save(notification);
     }
 
     public void deleteNotification(Integer id) {
-        Notification notification = getNotificationById(id);
+        Notification notification = notificationRepository.findNotificationById(id);
+
+        if (notification == null) throw new ApiException("Notification not found");
 
         notificationRepository.delete(notification);
     }

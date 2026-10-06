@@ -17,51 +17,49 @@ public class MaintenanceRuleService {
     private final MaintenanceRuleRepository maintenanceRuleRepository;
     private final UserManualRepository userManualRepository;
 
-
-
-    public List<MaintenanceRule>getAll(){
+    public List<MaintenanceRule> getMaintenanceRules() {
         return maintenanceRuleRepository.findAll();
     }
-//اضفت التحقق من المستخدم
-    public void addMaintenanceRule(MaintenanceRule maintenanceRule){
-        UserManual userManual=userManualRepository.findUserManualById(maintenanceRule.getUserManual().getId());
-        if(userManual==null){
-            throw new ApiException("user manual id not found ");
-        }
+
+    public MaintenanceRule getMaintenanceRuleById(Integer id) {
+        MaintenanceRule maintenanceRule = maintenanceRuleRepository.findMaintenanceRuleById(id);
+
+        if (maintenanceRule == null) throw new ApiException("Maintenance rule not found");
+
+        return maintenanceRule;
+    }
+
+    public void addMaintenanceRule(Integer userManualId, MaintenanceRule maintenanceRule) {
+        UserManual userManual = userManualRepository.findUserManualById(userManualId);
+
+        if (userManual == null) throw new ApiException("User manual not found");
+
+        maintenanceRule.setUserManual(userManual);
+
         maintenanceRuleRepository.save(maintenanceRule);
     }
 
-    public void updateMaintenanceRule(Integer MaintenanceRuleId , MaintenanceRule maintenanceRule){
-        MaintenanceRule oldMaintenanceRule= maintenanceRuleRepository.findMaintenanceRuleById(MaintenanceRuleId);
-        if(oldMaintenanceRule==null){
-            throw new ApiException("maintenance rule id not found ");
-        }
-        oldMaintenanceRule.setCondition(maintenanceRule.getCondition());
-        oldMaintenanceRule.setDescription(maintenanceRule.getDescription());
-        oldMaintenanceRule.setKilometerInterval(maintenanceRule.getKilometerInterval());
-        oldMaintenanceRule.setMonthInterval(maintenanceRule.getMonthInterval());
-        oldMaintenanceRule.setServiceName(maintenanceRule.getServiceName());
-        oldMaintenanceRule.setTriggerType(maintenanceRule.getTriggerType());
-        oldMaintenanceRule.setNotes(maintenanceRule.getNotes());
+    public void updateMaintenanceRule(Integer id, MaintenanceRule updateMaintenanceRule) {
+        MaintenanceRule maintenanceRule = maintenanceRuleRepository.findMaintenanceRuleById(id);
 
+        if (maintenanceRule == null) throw new ApiException("Maintenance rule not found");
 
-        //وضعتها كتعليق لمناقشة اذا نخليها بالتعديل او لا
-//        oldMaintenanceRule.setMaintenanceRecords(maintenanceRule.getMaintenanceRecords());
-//        oldMaintenanceRule.setUserManual(maintenanceRule.getUserManual());
+        maintenanceRule.setServiceName(updateMaintenanceRule.getServiceName());
+        maintenanceRule.setDescription(updateMaintenanceRule.getDescription());
+        maintenanceRule.setTriggerType(updateMaintenanceRule.getTriggerType());
+        maintenanceRule.setKilometerInterval(updateMaintenanceRule.getKilometerInterval());
+        maintenanceRule.setMonthInterval(updateMaintenanceRule.getMonthInterval());
+        maintenanceRule.setCondition(updateMaintenanceRule.getCondition());
+        maintenanceRule.setNotes(updateMaintenanceRule.getNotes());
 
-
-        maintenanceRuleRepository.save(oldMaintenanceRule);
-
+        maintenanceRuleRepository.save(maintenanceRule);
     }
 
-    public void deleteMaintenanceRule(Integer maintenanceRuleId){
-        MaintenanceRule oldMaintenanceRule=maintenanceRuleRepository.findMaintenanceRuleById(maintenanceRuleId);
-        if(oldMaintenanceRule==null){
-            throw new ApiException("maintenance rule id not found can not be deleted");
-        }
+    public void deleteMaintenanceRule(Integer id) {
+        MaintenanceRule maintenanceRule = maintenanceRuleRepository.findMaintenanceRuleById(id);
 
-        maintenanceRuleRepository.deleteById(maintenanceRuleId);
+        if (maintenanceRule == null) throw new ApiException("Maintenance rule not found");
+
+        maintenanceRuleRepository.delete(maintenanceRule);
     }
-
-
 }
