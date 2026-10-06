@@ -2,7 +2,9 @@ package com.nawaf.capstone3.Service;
 
 import com.nawaf.capstone3.Api.ApiException;
 import com.nawaf.capstone3.Model.MaintenanceRule;
+import com.nawaf.capstone3.Model.UserManual;
 import com.nawaf.capstone3.Repository.MaintenanceRuleRepository;
+import com.nawaf.capstone3.Repository.UserManualRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,14 +15,19 @@ import java.util.List;
 public class MaintenanceRuleService {
 
     private final MaintenanceRuleRepository maintenanceRuleRepository;
+    private final UserManualRepository userManualRepository;
 
 
 
     public List<MaintenanceRule>getAll(){
         return maintenanceRuleRepository.findAll();
     }
-
+//اضفت التحقق من المستخدم
     public void addMaintenanceRule(MaintenanceRule maintenanceRule){
+        UserManual userManual=userManualRepository.findUserManualById(maintenanceRule.getUserManual().getId());
+        if(userManual==null){
+            throw new ApiException("user manual id not found ");
+        }
         maintenanceRuleRepository.save(maintenanceRule);
     }
 
@@ -32,12 +39,16 @@ public class MaintenanceRuleService {
         oldMaintenanceRule.setCondition(maintenanceRule.getCondition());
         oldMaintenanceRule.setDescription(maintenanceRule.getDescription());
         oldMaintenanceRule.setKilometerInterval(maintenanceRule.getKilometerInterval());
-        oldMaintenanceRule.setMaintenanceRecords(maintenanceRule.getMaintenanceRecords());
         oldMaintenanceRule.setMonthInterval(maintenanceRule.getMonthInterval());
         oldMaintenanceRule.setServiceName(maintenanceRule.getServiceName());
         oldMaintenanceRule.setTriggerType(maintenanceRule.getTriggerType());
-        oldMaintenanceRule.setUserManual(maintenanceRule.getUserManual());
         oldMaintenanceRule.setNotes(maintenanceRule.getNotes());
+
+
+        //وضعتها كتعليق لمناقشة اذا نخليها بالتعديل او لا
+//        oldMaintenanceRule.setMaintenanceRecords(maintenanceRule.getMaintenanceRecords());
+//        oldMaintenanceRule.setUserManual(maintenanceRule.getUserManual());
+
 
         maintenanceRuleRepository.save(oldMaintenanceRule);
 

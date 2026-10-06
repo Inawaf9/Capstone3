@@ -27,13 +27,13 @@ public class UserManualController {
         return ResponseEntity.status(200).body(new ApiResponse("add successfully"));
     }
 
-    @PostMapping("/update/{userManualId}")
+    @PutMapping  ("/update/{userManualId}")
     public ResponseEntity<?>updateUserManual(@PathVariable Integer userManualId ,@RequestBody UserManual userManual){
         userManualService.updateUserManual(userManualId,userManual);
         return ResponseEntity.status(200).body(new ApiResponse("update successfully"));
     }
     @DeleteMapping("/delete/{userManualId}")
-    public ResponseEntity<?>deleteUserManual(Integer userManualId){
+    public ResponseEntity<?>deleteUserManual(@PathVariable Integer userManualId){
         userManualService.deleteUserManual(userManualId);
         return ResponseEntity.status(200).body(new ApiResponse("deleted successfully"));
     }
