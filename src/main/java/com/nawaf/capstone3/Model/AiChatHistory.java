@@ -23,12 +23,12 @@ public class AiChatHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotEmpty(message = "User message required")
+    @NotEmpty(message = "User message is required")
     @Size(max = 200, message = "User message cannot be more than 200 characters")
     @Column(nullable = false, length = 200)
     private String userMessage;
 
-    @NotEmpty(message = "AI response required")
+    @NotEmpty(message = "AI response is required")
     @Column(nullable = false, columnDefinition = "TEXT")
     private String aiResponse;
 

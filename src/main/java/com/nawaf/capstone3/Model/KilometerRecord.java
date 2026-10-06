@@ -24,8 +24,8 @@ public class KilometerRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotNull(message = "Kilometers required")
-    @Positive(message = "Kilometers must be positive number")
+    @NotNull(message = "Kilometers are required")
+    @Positive(message = "Kilometers must be a positive number")
     @Column(nullable = false)
     private Integer kilometers;
 

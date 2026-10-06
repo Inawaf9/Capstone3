@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface MaintenanceRuleRepository extends JpaRepository<MaintenanceRule,Integer> {
+public interface MaintenanceRuleRepository extends JpaRepository<MaintenanceRule, Integer> {
 
     MaintenanceRule findMaintenanceRuleById(Integer id);
 }

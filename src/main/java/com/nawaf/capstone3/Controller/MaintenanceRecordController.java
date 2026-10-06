@@ -3,38 +3,43 @@ package com.nawaf.capstone3.Controller;
 import com.nawaf.capstone3.Api.ApiResponse;
 import com.nawaf.capstone3.Model.MaintenanceRecord;
 import com.nawaf.capstone3.Service.MaintenanceRecordService;
-import lombok.AllArgsConstructor;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-@AllArgsConstructor
 @RestController
-@RequestMapping("/api/v1/maintenanceRecord")
+@RequestMapping("/api/v1/maintenance-record")
+@RequiredArgsConstructor
 public class MaintenanceRecordController {
 
     private final MaintenanceRecordService maintenanceRecordService;
 
-    @GetMapping("/get")
-    public ResponseEntity<?> getAll(){
-        List<MaintenanceRecord> maintenanceRecordList=maintenanceRecordService.getAll();
-        return ResponseEntity.status(200).body(maintenanceRecordList);
+    @GetMapping("/get-all")
+    public ResponseEntity<?> getMaintenanceRecords() {
+        return ResponseEntity.status(200).body(maintenanceRecordService.getMaintenanceRecords());
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<?>addMaintenanceRecord(@RequestBody MaintenanceRecord maintenanceRecord){
-        maintenanceRecordService.addMaintenanceRecord(maintenanceRecord);
-        return ResponseEntity.status(200).body(new ApiResponse("added successfully"));
+    @GetMapping("/get/{id}")
+    public ResponseEntity<?> getMaintenanceRecordById(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(maintenanceRecordService.getMaintenanceRecordById(id));
     }
-    @DeleteMapping("/delete/{maintenanceRecordId}")
-    public ResponseEntity<?>deleteMaintenanceRecord(@PathVariable Integer maintenanceRecordId){
-        maintenanceRecordService.deleteMaintenanceRecord(maintenanceRecordId);
-        return ResponseEntity.status(200).body(new ApiResponse("deleted done "));
+
+    @PostMapping("/add/{vehicleId}/{maintenanceRuleId}")
+    public ResponseEntity<?> addMaintenanceRecord(@PathVariable Integer vehicleId, @PathVariable Integer maintenanceRuleId, @Valid @RequestBody MaintenanceRecord maintenanceRecord) {
+        maintenanceRecordService.addMaintenanceRecord(vehicleId, maintenanceRuleId, maintenanceRecord);
+        return ResponseEntity.status(201).body(new ApiResponse("Maintenance record added successfully"));
     }
-    @PutMapping("/update/{maintenanceRecordId}")
-    public ResponseEntity<?>updatedMaintenanceRecord(@PathVariable Integer maintenanceRecordId,@RequestBody MaintenanceRecord maintenanceRecord){
-        maintenanceRecordService.updateMaintenanceRecord(maintenanceRecordId,maintenanceRecord);
-        return ResponseEntity.status(200).body(new ApiResponse("updated done "));
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateMaintenanceRecord(@PathVariable Integer id, @Valid @RequestBody MaintenanceRecord maintenanceRecord) {
+        maintenanceRecordService.updateMaintenanceRecord(id, maintenanceRecord);
+        return ResponseEntity.status(200).body(new ApiResponse("Maintenance record updated successfully"));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteMaintenanceRecord(@PathVariable Integer id) {
+        maintenanceRecordService.deleteMaintenanceRecord(id);
+        return ResponseEntity.status(200).body(new ApiResponse("Maintenance record deleted successfully"));
     }
 }

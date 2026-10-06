@@ -16,8 +16,8 @@ public class AiChatHistoryController {
     private final AiChatHistoryService aiChatHistoryService;
 
     @GetMapping("/get-all")
-    public ResponseEntity<?> getAllAiChatHistories() {
-        return ResponseEntity.status(200).body(aiChatHistoryService.getAllAiChatHistories());
+    public ResponseEntity<?> getAiChatHistories() {
+        return ResponseEntity.status(200).body(aiChatHistoryService.getAiChatHistories());
     }
 
     @GetMapping("/get/{id}")
@@ -28,21 +28,18 @@ public class AiChatHistoryController {
     @PostMapping("/add/{vehicleId}")
     public ResponseEntity<?> addAiChatHistory(@PathVariable Integer vehicleId, @Valid @RequestBody AiChatHistory aiChatHistory) {
         aiChatHistoryService.addAiChatHistory(vehicleId, aiChatHistory);
-
         return ResponseEntity.status(201).body(new ApiResponse("AI chat history added successfully"));
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateAiChatHistory(@PathVariable Integer id, @Valid @RequestBody AiChatHistory aiChatHistory) {
         aiChatHistoryService.updateAiChatHistory(id, aiChatHistory);
-
         return ResponseEntity.status(200).body(new ApiResponse("AI chat history updated successfully"));
     }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteAiChatHistory(@PathVariable Integer id) {
         aiChatHistoryService.deleteAiChatHistory(id);
-
         return ResponseEntity.status(200).body(new ApiResponse("AI chat history deleted successfully"));
     }
 }

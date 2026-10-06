@@ -1,5 +1,6 @@
 package com.nawaf.capstone3.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -32,13 +33,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotEmpty(message = "Name required")
+    @NotEmpty(message = "Name is required")
     @Size(max = 50, message = "Name cannot be more than 50 characters")
     @Column(nullable = false, length = 50)
     private String name;
 
-    @NotEmpty(message = "Email required")
-    @Email(message = "Enter valid email")
+    @NotEmpty(message = "Email is required")
+    @Email(message = "Enter a valid email")
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -57,11 +58,14 @@ public class User {
             message = "Password must contain uppercase, lowercase, number, and special character"
     )
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<Vehicle> vehicles;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Set<Notification> notifications;
 }

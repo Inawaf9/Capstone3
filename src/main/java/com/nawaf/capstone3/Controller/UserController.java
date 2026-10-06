@@ -8,8 +8,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/user")
 @AllArgsConstructor
@@ -17,34 +15,31 @@ public class UserController {
 
     private final UserService userService;
 
-
-    @GetMapping("/get")
-    public ResponseEntity<?> getAllUser() {
-        return ResponseEntity.status(200).body(userService.getAllUser());
+    @GetMapping("/get-all")
+    public ResponseEntity<?> getUsers() {
+        return ResponseEntity.status(200).body(userService.getUsers());
     }
 
+    @GetMapping("/get/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Integer id) {
+        return ResponseEntity.status(200).body(userService.getUserById(id));
+    }
 
     @PostMapping("/add")
     public ResponseEntity<?> addUser(@Valid @RequestBody User user) {
         userService.addUser(user);
-        return ResponseEntity.status(200).body(new ApiResponse("User add successfully"));
+        return ResponseEntity.status(201).body(new ApiResponse("User added successfully"));
     }
 
-
-    @PutMapping("/update/{userId}")
-    public ResponseEntity<?> update(
-            @PathVariable Integer userId,
-            @Valid @RequestBody User updateUser) {
-
-        userService.update(userId, updateUser);
-        return ResponseEntity.status(200).body(new ApiResponse("User update successfully"));
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Integer id, @Valid @RequestBody User user) {
+        userService.updateUser(id, user);
+        return ResponseEntity.status(200).body(new ApiResponse("User updated successfully"));
     }
 
-
-    @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<?> delete(@PathVariable Integer userId) {
-
-        userService.delete(userId);
-        return ResponseEntity.status(200).body(new ApiResponse("User delete successfully"));
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
+        userService.deleteUser(id);
+        return ResponseEntity.status(200).body(new ApiResponse("User deleted successfully"));
     }
 }
