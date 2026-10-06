@@ -55,7 +55,7 @@ public class NotificationController {
     }
 
     @PostMapping("/retry/{notificationId}")
-    private ResponseEntity<?>retryNotification(@PathVariable Integer notificationId){
+    public ResponseEntity<?>retryNotification(@PathVariable Integer notificationId){
         return ResponseEntity.status(200).body(notificationService.retryNotification(notificationId));
     }
 

@@ -10,6 +10,5 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
     Notification findNotificationById(Integer id);
     Notification findTopByMaintenanceRecordIdAndStatusOrderBySentAtDesc(Integer maintenanceRecordId, String status);
     Notification findTopByMaintenanceRecordIdAndStatus(Integer maintenanceRecordId, String status);
-    Notification findTopByVehicleIdAndTypeOrderBySentAtDesc(Integer VehicleId ,String status);
 
 }

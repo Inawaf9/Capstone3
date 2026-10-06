@@ -36,7 +36,7 @@ public class NotificationService {
     }
 
     public void addNotification(Integer userId, Notification notification) {
-        User user = userRepository.findUsersById(userId);
+        User user = userRepository.findUserById(userId);
 
         if (user == null) throw new ApiException("User not found");
 
