@@ -60,18 +60,14 @@ public class Vehicle {
     private User user;
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
-    @JsonIgnore
     private Set<KilometerRecord> kilometerRecords;
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
-    @JsonIgnore
     private Set<AiChatHistory> aiChatHistories;
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
-    @JsonIgnore
     private Set<MaintenanceRecord> maintenanceRecords;
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
-    @JsonIgnore
     private Set<UserManual> userManuals;
 }

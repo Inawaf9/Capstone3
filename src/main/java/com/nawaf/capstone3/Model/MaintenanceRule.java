@@ -61,6 +61,5 @@ public class MaintenanceRule {
     private UserManual userManual;
 
     @OneToMany(mappedBy = "maintenanceRule")
-    @JsonIgnore
     private Set<MaintenanceRecord> maintenanceRecords;
 }

@@ -57,6 +57,5 @@ public class UserManual {
     private Vehicle vehicle;
 
     @OneToMany(mappedBy = "userManual", cascade = CascadeType.ALL)
-    @JsonIgnore
     private Set<MaintenanceRule> maintenanceRules;
 }
