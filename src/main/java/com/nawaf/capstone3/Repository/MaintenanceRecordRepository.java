@@ -1,6 +1,7 @@
 package com.nawaf.capstone3.Repository;
 
 import com.nawaf.capstone3.Model.MaintenanceRecord;
+import com.nawaf.capstone3.Model.Notification;
 import com.nawaf.capstone3.Model.Vehicle;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,6 +23,6 @@ public interface MaintenanceRecordRepository extends JpaRepository<MaintenanceRe
     AND YEAR(m.serviceDate) = :year
     """)
     Double getTotalCostByVehicleAndYear(@Param("vehicleId") Integer vehicleId, @Param("year") Integer year);
-
+    MaintenanceRecord findTopByVehicleIdOrderByServiceDateDesc(Integer vehicleId);
 
 }

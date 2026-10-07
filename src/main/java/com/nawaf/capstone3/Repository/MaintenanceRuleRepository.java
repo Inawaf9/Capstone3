@@ -11,5 +11,5 @@ import java.util.List;
 public interface MaintenanceRuleRepository extends JpaRepository<MaintenanceRule, Integer> {
 
     MaintenanceRule findMaintenanceRuleById(Integer id);
-    List<MaintenanceRule> findMaintenanceRuleByUserManual_Vehicle(Vehicle vehicle);
+    List<MaintenanceRule>findMaintenanceRuleByVehicle(Vehicle vehicle);
 }

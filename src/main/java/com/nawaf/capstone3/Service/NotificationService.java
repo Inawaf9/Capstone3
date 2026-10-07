@@ -21,7 +21,6 @@ public class NotificationService {
     private final MaintenanceRecordRepository maintenanceRecordRepository;
     private final WhatsAppService whatsAppService;
     private final EmailService emailService;
-    private final UserManualRepository userManualRepository;
 
     public List<Notification> getNotifications() {
         return notificationRepository.findAll();
@@ -90,20 +89,15 @@ public class NotificationService {
 
             boolean due = false;
 
-            // فحص الصيانة حسب الكيلومترات
-            if (rule.getTriggerType().equals("KILOMETER")) {
-
-                due = vehicle.getCurrentKilometers() - record.getKilometers()
-                        >= rule.getKilometerInterval();
+                  // فحص الصيانة حسب الكيلومترات
+            if (rule.getKilometers() != null) {
+                due = vehicle.getCurrentKilometers() - record.getKilometers() >= rule.getKilometers();
             }
 
             // فحص الصيانة حسب الوقت
-            if (rule.getTriggerType().equals("TIME")) {
-
-                due = !LocalDate.now().isBefore(
-                        record.getServiceDate()
-                                .plusMonths(rule.getMonthInterval())
-                );
+            if (rule.getMonthInterval() != null) {
+                boolean timeDue = !LocalDate.now().isBefore(record.getServiceDate().plusMonths(rule.getMonthInterval()));
+                due = due || timeDue;
             }
 
             if (due) {
@@ -213,6 +207,8 @@ public class NotificationService {
     }
 
 
+
+
     public void sendMonthlyReport(Integer vehicleId) {
 
         Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
@@ -221,36 +217,45 @@ public class NotificationService {
             throw new ApiException("Vehicle not found");
         }
 
-        UserManual firstManual =
-                userManualRepository.findTopByVehicleIdOrderByUploadedAtAsc(vehicleId);
-
-        if (firstManual == null) {
-            throw new ApiException("Vehicle has no user manual");
+        // نجيب سجل صيانة للسيارة حتى نربط به الـNotification
+        MaintenanceRecord maintenanceRecord = maintenanceRecordRepository.findTopByVehicleIdOrderByServiceDateDesc(vehicleId);
+        if (maintenanceRecord == null) {
+            throw new ApiException("Vehicle has no maintenance record");
         }
 
-        // تاريخ أول User Manual = بداية دورة التقارير
-        LocalDateTime firstDate = firstManual.getUploadedAt();
-
+        LocalDateTime firstDate = vehicle.getCreatedAt();
         LocalDateTime now = LocalDateTime.now();
+
+        // السيارة ما كملت شهر
+        if (firstDate.plusMonths(1).isAfter(now)) {
+            return;
+        }
+
+        // آخر تقرير تم إرساله لهذه السيارة
+        Notification lastReport = notificationRepository.findTopByMaintenanceRecordVehicleIdAndTypeOrderBySentAtDesc(vehicleId, "REPORT"
+                        );
+
+        // إذا آخر تقرير انرسل قبل أقل من شهر، لا نرسل مرة ثانية
+        if (lastReport != null
+                && lastReport.getSentAt() != null
+                && lastReport.getSentAt().plusMonths(1).isAfter(now)) {
+            return;
+        }
 
         LocalDateTime startDate = firstDate;
         LocalDateTime endDate = startDate.plusMonths(1);
 
-        // نحدد آخر شهر مكتمل
+        // نحدد آخر فترة مكتملة
         while (!endDate.isAfter(now)) {
             startDate = endDate;
             endDate = startDate.plusMonths(1);
         }
 
-        // نرجع للشهر المكتمل الأخير
+        // نرجع للفترة المكتملة السابقة
         startDate = startDate.minusMonths(1);
         endDate = startDate.plusMonths(1);
 
-        String report = buildMonthlyReport(
-                vehicle,
-                startDate,
-                endDate
-        );
+        String report = buildMonthlyReport(vehicle, startDate, endDate);
 
         emailService.sendMonthlyReport(
                 vehicle.getUser().getEmail(),
@@ -259,36 +264,40 @@ public class NotificationService {
                 report
         );
 
-        // نسجل أن التقرير تم إرساله
-        Notification notification = new Notification();
 
+        Notification notification = new Notification();
         notification.setType("REPORT");
         notification.setChannel("EMAIL");
         notification.setStatus("SENT");
         notification.setMessage("Monthly vehicle report");
         notification.setSentAt(LocalDateTime.now());
         notification.setUser(vehicle.getUser());
+        notification.setMaintenanceRecord(maintenanceRecord);
 
         notificationRepository.save(notification);
     }
 
 
-    private String buildMonthlyReport(
-            Vehicle vehicle,
-            LocalDateTime startDate,
-            LocalDateTime endDate
+    private String buildMonthlyReport(Vehicle vehicle, LocalDateTime startDate, LocalDateTime endDate
     ) {
-
+     //كم صيانة تمت؟
+     //كم مجموع تكلفتها؟
         int maintenanceCount = 0;
         double maintenanceCost = 0;
 
+      //كم Receipt؟
+      //كم مجموع مبالغها؟
         int receiptCount = 0;
         double receiptTotal = 0;
 
+       //- كم Notification؟
+        //- كم واحدة SENT؟
+        //- كم واحدة FAILED؟
         int notificationCount = 0;
         int sentNotifications = 0;
         int failedNotifications = 0;
 
+        //عشان يعرف بداية ونهاية الكيلومترات.
         int startKilometers = 0;
         int endKilometers = 0;
 
@@ -297,6 +306,7 @@ public class NotificationService {
             LocalDateTime serviceDate = record.getServiceDate().atStartOfDay();
 
             if (!serviceDate.isBefore(startDate) && serviceDate.isBefore(endDate)) {
+               // إذا كانت الصيانة داخل الشهر
                 maintenanceCount++;
                 maintenanceCost += record.getCost();
 
@@ -348,7 +358,7 @@ public class NotificationService {
             if (!record.getRecordedAt().isBefore(startDate)
                     && record.getRecordedAt().isBefore(endDate)) {
 
-                if (startKilometers == 0) {
+                if (startKilometers == 0 || record.getRecordedAt().isBefore(startDate)) {
                     startKilometers = record.getKilometers();
                 }
 

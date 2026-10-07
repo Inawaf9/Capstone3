@@ -6,13 +6,13 @@ import com.nawaf.capstone3.Service.MaintenanceRuleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/maintenance-rule")
 @RequiredArgsConstructor
 public class MaintenanceRuleController {
-
     private final MaintenanceRuleService maintenanceRuleService;
 
     @GetMapping("/get-all")
@@ -25,14 +25,14 @@ public class MaintenanceRuleController {
         return ResponseEntity.status(200).body(maintenanceRuleService.getMaintenanceRuleById(id));
     }
 
-    @PostMapping("/add/{userManualId}")
-    public ResponseEntity<?> addMaintenanceRule(@PathVariable Integer userManualId, @Valid @RequestBody MaintenanceRule maintenanceRule) {
-        maintenanceRuleService.addMaintenanceRule(userManualId, maintenanceRule);
+    @PostMapping("/add/{vehicleId}")
+    public ResponseEntity<?> addMaintenanceRule(@PathVariable Integer vehicleId, @Valid @RequestBody MaintenanceRule maintenanceRule, Errors errors) {
+        maintenanceRuleService.addMaintenanceRule(vehicleId, maintenanceRule);
         return ResponseEntity.status(201).body(new ApiResponse("Maintenance rule added successfully"));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateMaintenanceRule(@PathVariable Integer id, @Valid @RequestBody MaintenanceRule maintenanceRule) {
+    public ResponseEntity<?> updateMaintenanceRule(@PathVariable Integer id, @Valid @RequestBody MaintenanceRule maintenanceRule, Errors errors) {
         maintenanceRuleService.updateMaintenanceRule(id, maintenanceRule);
         return ResponseEntity.status(200).body(new ApiResponse("Maintenance rule updated successfully"));
     }

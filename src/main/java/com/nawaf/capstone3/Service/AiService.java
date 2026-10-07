@@ -25,39 +25,50 @@ public class AiService {
     private final MaintenanceRecordRepository maintenanceRecordRepository;
 
 // 1. Ask about vehicle
-    public String askAboutVehicle(Integer vehicleId, String question) {
+public String askAboutVehicle(Integer vehicleId, String question) {
 
-        Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
-        if (vehicle == null) {
-            throw new ApiException("vehicle not found");
-        }
+    Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
 
-        // Get maintenance information from the vehicle manual
-        List<MaintenanceRule> maintenanceRules = maintenanceRuleRepository.findMaintenanceRuleByUserManual_Vehicle(vehicle);
-        StringBuilder maintenanceInformation = new StringBuilder();
-            for (MaintenanceRule rule : maintenanceRules) {
-                maintenanceInformation.append("""
-                    Service name: %s
-                    Description: %s
-                    Trigger type: %s
-                    Kilometer interval: %s
-                    Month interval: %s
-                    Condition: %s
-                    Notes: %s
+    if (vehicle == null) {
+        throw new ApiException("vehicle not found");
+    }
 
-                    """.formatted(
-                        rule.getServiceName(),
-                        rule.getDescription(),
-                        rule.getTriggerType(),
-                        rule.getKilometerInterval(),
-                        rule.getMonthInterval(),
-                        rule.getCondition(),
-                        rule.getNotes()
-                ));
-            }
+    // Get maintenance information directly from the vehicle
+    List<MaintenanceRule> maintenanceRules = maintenanceRuleRepository.findMaintenanceRuleByVehicle(vehicle);
 
+    StringBuilder maintenanceInformation = new StringBuilder();
 
-        String prompt = """
+    for (MaintenanceRule rule : maintenanceRules) {
+
+        maintenanceInformation.append("""
+                Service name: %s
+                Description: %s
+                Category: %s
+                Action: %s
+                Kilometer interval: %s
+                Month interval: %s
+                Condition: %s
+                Specification: %s
+                Capacity: %s
+                Notes: %s
+                Source: %s
+
+                """.formatted(
+                rule.getServiceName(),
+                rule.getDescription(),
+                rule.getCategory(),
+                rule.getAction(),
+                rule.getKilometers(),
+                rule.getMonthInterval(),
+                rule.getCondition(),
+                rule.getSpecification(),
+                rule.getCapacity(),
+                rule.getNotes(),
+                rule.getSource()
+        ));
+    }
+
+    String prompt = """
             You are an intelligent vehicle maintenance assistant.
 
             Your task is to answer the user's question about their vehicle
@@ -75,7 +86,7 @@ public class AiService {
             Current Kilometers: %s
 
             ==============================
-            VEHICLE MANUAL MAINTENANCE INFORMATION
+            VEHICLE MAINTENANCE INFORMATION
             ==============================
             %s
 
@@ -83,7 +94,7 @@ public class AiService {
             USER QUESTION
             ==============================
             %s
-            
+
             ==============================
             INSTRUCTIONS
             ==============================
@@ -93,11 +104,12 @@ public class AiService {
             2. Use the vehicle information to make the answer relevant
                to this specific vehicle.
 
-            3. For maintenance-related questions, use the maintenance
-               information from the vehicle manual as the primary source.
+            3. For maintenance-related questions, use the provided
+               vehicle maintenance information as the primary source.
 
-            4. If the manual provides a specific maintenance interval,
-               requirement, condition, or recommendation, use that
+            4. If the maintenance information provides a specific
+               maintenance interval, requirement, specification,
+               capacity, condition, or recommendation, use that
                information in your answer.
 
             5. Do not invent maintenance intervals, specifications,
@@ -107,13 +119,14 @@ public class AiService {
                is not enough to give a reliable answer, clearly explain
                what information is missing.
 
-            7. If the question is about when maintenance is due, compare
-               the current kilometers with the maintenance intervals
-               provided in the manual when possible.
+            7. If the question is about when maintenance is due,
+               compare the current kilometers with the maintenance
+               intervals provided when possible.
 
             8. If the question is about a possible vehicle problem,
-               provide possible causes and recommended checks, but do not
-               claim a definite diagnosis without enough information.
+               provide possible causes and recommended checks based on
+               the available vehicle and maintenance information.
+               Do not claim a definite diagnosis without enough information.
 
             9. If the question is unrelated to the vehicle or vehicle
                maintenance, politely explain that you can only assist
@@ -121,71 +134,79 @@ public class AiService {
 
             10. Give a clear, practical, and easy-to-understand answer.
 
-            11. When useful, organize the answer using short headings
-                or bullet points.
+            11. Respond in the same language as the user's question.
+                If the user asks in Arabic, answer in Arabic.
+                If the user asks in English, answer in English.
 
             Provide the best answer based on the available vehicle
             and maintenance information.
             """.formatted(
-                vehicle.getMake(),
-                vehicle.getModel(),
-                vehicle.getYear(),
-                vehicle.getEngine(),
-                vehicle.getFuelType(),
-                vehicle.getCurrentKilometers(),
-                maintenanceInformation.toString(),
-                question
-        );
+            vehicle.getMake(),
+            vehicle.getModel(),
+            vehicle.getYear(),
+            vehicle.getEngine(),
+            vehicle.getFuelType(),
+            vehicle.getCurrentKilometers(),
+            maintenanceInformation.toString(),
+            question
+    );
 
-        String aiResponse = client.sendPrompt(prompt);
+    String aiResponse = client.sendPrompt(prompt);
 
-        AiChatHistory history = new AiChatHistory();
-        history.setUserMessage(question);
-        history.setAiResponse(aiResponse);
-        history.setVehicle(vehicle);
+    AiChatHistory history = new AiChatHistory();
+    history.setUserMessage(question);
+    history.setAiResponse(aiResponse);
+    history.setVehicle(vehicle);
 
-        aiChatHistoryRepository.save(history);
+    aiChatHistoryRepository.save(history);
 
-        return aiResponse;
-    }
+    return aiResponse;
+}
 
-
-
-
-    // 2. Analyze vehicle problem
+    // Analyze vehicle problem
 
     public String analyzeProblem(Integer vehicleId, String problem) {
 
-        // Get vehicle
         Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
 
         if (vehicle == null) {
             throw new ApiException("vehicle not found");
         }
-        // Get maintenance information from the vehicle manual
-        List<MaintenanceRule> maintenanceRules = maintenanceRuleRepository.findMaintenanceRuleByUserManual_Vehicle(vehicle);
+
+        // Get maintenance information from the vehicle
+        List<MaintenanceRule> maintenanceRules =
+                maintenanceRuleRepository.findMaintenanceRuleByVehicle(vehicle);
+
         StringBuilder maintenanceInformation = new StringBuilder();
 
-            for (MaintenanceRule rule :maintenanceRules) {
-                maintenanceInformation.append("""
-                    Service name: %s
-                    Description: %s
-                    Trigger type: %s
-                    Kilometer interval: %s
-                    Month interval: %s
-                    Condition: %s
-                    Notes: %s
+        for (MaintenanceRule rule : maintenanceRules) {
 
-                    """.formatted(
-                        rule.getServiceName(),
-                        rule.getDescription(),
-                        rule.getTriggerType(),
-                        rule.getKilometerInterval(),
-                        rule.getMonthInterval(),
-                        rule.getCondition(),
-                        rule.getNotes()
-                ));
+            maintenanceInformation.append("""
+                Service name: %s
+                Description: %s
+                Category: %s
+                Action: %s
+                Kilometer interval: %s
+                Month interval: %s
+                Condition: %s
+                Specification: %s
+                Capacity: %s
+                Notes: %s
+                Source: %s
 
+                """.formatted(
+                    rule.getServiceName(),
+                    rule.getDescription(),
+                    rule.getCategory(),
+                    rule.getAction(),
+                    rule.getKilometers(),
+                    rule.getMonthInterval(),
+                    rule.getCondition(),
+                    rule.getSpecification(),
+                    rule.getCapacity(),
+                    rule.getNotes(),
+                    rule.getSource()
+            ));
         }
 
         String prompt = """
@@ -206,7 +227,7 @@ public class AiService {
             Current Kilometers: %s
 
             ==============================
-            VEHICLE MANUAL MAINTENANCE INFORMATION
+            VEHICLE MAINTENANCE INFORMATION
             ==============================
             %s
 
@@ -220,7 +241,7 @@ public class AiService {
             ==============================
 
             1. Analyze the problem based on the vehicle information
-               and the information provided from the vehicle manual.
+               and the maintenance information provided.
 
             2. Provide the most likely possible causes of the problem.
                Do not claim that any cause is a definite diagnosis.
@@ -230,9 +251,9 @@ public class AiService {
 
             4. Provide possible solutions or recommended actions.
 
-            5. If the maintenance manual contains a relevant maintenance
-               service, inspection, condition, or recommendation related
-               to the problem, mention it.
+            5. If the maintenance information contains a relevant
+               maintenance service, inspection, condition, or
+               recommendation related to the problem, mention it.
 
             6. Do not invent maintenance information, specifications,
                or vehicle information that is not provided.
@@ -267,14 +288,16 @@ public class AiService {
                 vehicle.getEngine(),
                 vehicle.getFuelType(),
                 vehicle.getCurrentKilometers(),
-                maintenanceInformation.toString(),                problem
+                maintenanceInformation.toString(),
+                problem
         );
+
         return client.sendPrompt(prompt);
     }
 
 
+    // Maintenance advice
 
-    // 3. Maintenance advice
     public String maintenanceProblem(Integer vehicleId) {
 
         Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
@@ -283,39 +306,48 @@ public class AiService {
             throw new ApiException("vehicle not found");
         }
 
-        // Get maintenance information from the vehicle manual
-        List<MaintenanceRule> maintenanceRules = maintenanceRuleRepository.findMaintenanceRuleByUserManual_Vehicle(vehicle);
+        // Get maintenance information from the vehicle
+        List<MaintenanceRule> maintenanceRules =
+                maintenanceRuleRepository.findMaintenanceRuleByVehicle(vehicle);
+
         StringBuilder maintenanceInformation = new StringBuilder();
 
         for (MaintenanceRule rule : maintenanceRules) {
 
             maintenanceInformation.append("""
-                    Service name: %s
-                    Description: %s
-                    Trigger type: %s
-                    Kilometer interval: %s
-                    Month interval: %s
-                    Condition: %s
-                    Notes: %s
+                Service name: %s
+                Description: %s
+                Category: %s
+                Action: %s
+                Kilometer interval: %s
+                Month interval: %s
+                Condition: %s
+                Specification: %s
+                Capacity: %s
+                Notes: %s
+                Source: %s
 
-                    """.formatted(
-                        rule.getServiceName(),
-                        rule.getDescription(),
-                        rule.getTriggerType(),
-                        rule.getKilometerInterval(),
-                        rule.getMonthInterval(),
-                        rule.getCondition(),
-                        rule.getNotes()
-                ));
-            }
-
+                """.formatted(
+                    rule.getServiceName(),
+                    rule.getDescription(),
+                    rule.getCategory(),
+                    rule.getAction(),
+                    rule.getKilometers(),
+                    rule.getMonthInterval(),
+                    rule.getCondition(),
+                    rule.getSpecification(),
+                    rule.getCapacity(),
+                    rule.getNotes(),
+                    rule.getSource()
+            ));
+        }
 
         String prompt = """
             You are an intelligent vehicle maintenance assistant.
 
             Your task is to provide personalized maintenance advice
             for the vehicle using the vehicle information and the
-            maintenance information from its vehicle manual.
+            maintenance information provided below.
 
             ==============================
             VEHICLE INFORMATION
@@ -328,7 +360,7 @@ public class AiService {
             Current Kilometers: %s
 
             ==============================
-            VEHICLE MANUAL MAINTENANCE INFORMATION
+            VEHICLE MAINTENANCE INFORMATION
             ==============================
             %s
 
@@ -338,7 +370,7 @@ public class AiService {
 
             1. Identify the maintenance services that may be due
                based on the vehicle's current kilometers and the
-               maintenance intervals provided in the manual.
+               maintenance intervals provided.
 
             2. Identify upcoming maintenance services when possible.
 
@@ -349,18 +381,18 @@ public class AiService {
                maintenance rules when the required information
                is available.
 
-            5. Use the vehicle manual maintenance information as
-               the primary source for all maintenance recommendations.
+            5. Use the vehicle maintenance information as the
+               primary source for all maintenance recommendations.
 
             6. Do not invent maintenance intervals, services,
                specifications, or requirements.
 
             7. If the available information is not enough to determine
-               whether a service is due, clearly explain what information
-               is missing.
+               whether a service is due, clearly explain what
+               information is missing.
 
             8. Highlight important maintenance warnings or conditions
-               mentioned in the vehicle manual.
+               mentioned in the maintenance information.
 
             9. Give clear, practical, and easy-to-understand advice.
 
@@ -372,7 +404,7 @@ public class AiService {
                 Important Warnings
 
             Provide the best maintenance advice based on the vehicle
-            information and the available vehicle manual.
+            information and the available maintenance information.
             """.formatted(
                 vehicle.getMake(),
                 vehicle.getModel(),
@@ -382,11 +414,11 @@ public class AiService {
                 vehicle.getCurrentKilometers(),
                 maintenanceInformation.toString()
         );
+
         return client.sendPrompt(prompt);
     }
 
-
-    // 4. Summarize maintenance history
+    //  Summarize maintenance history
     public String summarizeHistory(Integer vehicleId) {
 
         Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
