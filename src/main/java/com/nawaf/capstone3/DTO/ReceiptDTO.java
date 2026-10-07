@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,5 +17,5 @@ public class ReceiptDTO {
 
     private Double totalAmount;
     private LocalDate extractedDate;
-    private String serviceType;
+   private List<String> services;
 }

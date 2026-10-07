@@ -75,10 +75,16 @@ public class ReceiptService {
 
         List<ReceiptDTO>receiptDTOS=new ArrayList<>();
         for (Receipt receipt:receipts){
-            ReceiptDTO dto=new ReceiptDTO(
-            receipt.getTotalAmount(),
-            receipt.getExtractedDate(),
-            receipt.getMaintenanceRecord().getMaintenanceRule().getServiceName()
+            List<String> services = List.of(
+                    receipt.getMaintenanceRecord()
+                            .getMaintenanceRule()
+                            .getServiceName()
+            );
+
+            ReceiptDTO dto = new ReceiptDTO(
+                    receipt.getTotalAmount(),
+                    receipt.getExtractedDate(),
+                    services
             );
             receiptDTOS.add(dto);
         }
