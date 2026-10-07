@@ -2,11 +2,14 @@ package com.nawaf.capstone3.Controller;
 
 import com.nawaf.capstone3.Api.ApiResponse;
 import com.nawaf.capstone3.Model.UserManual;
+import com.nawaf.capstone3.Service.ManualAnalysisService;
 import com.nawaf.capstone3.Service.UserManualService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/user-manual")
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserManualController {
 
     private final UserManualService userManualService;
+    private final ManualAnalysisService manualAnalysisService;
 
     @GetMapping("/get-all")
     public ResponseEntity<?> getUserManuals() {
@@ -41,5 +45,16 @@ public class UserManualController {
     public ResponseEntity<?> deleteUserManual(@PathVariable Integer id) {
         userManualService.deleteUserManual(id);
         return ResponseEntity.status(200).body(new ApiResponse("User manual deleted successfully"));
+    }
+
+    @PostMapping("/analyze/{id}")
+    public ResponseEntity<Map<String, Object>> analyze(@PathVariable Integer id) {   // ⚠ Integer
+        manualAnalysisService.startAnalysis(id);
+        return ResponseEntity.accepted().body(Map.of("manualId", id, "status", "ANALYZING"));
+    }
+
+    @GetMapping("/status/{id}")
+    public Map<String, Object> status(@PathVariable Integer id) {                    // ⚠ Integer
+        return Map.of("manualId", id, "status", manualAnalysisService.getStatus(id));
     }
 }

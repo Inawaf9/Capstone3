@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 public interface MaintenanceRuleRepository extends JpaRepository<MaintenanceRule, Integer> {
 
     MaintenanceRule findMaintenanceRuleById(Integer id);
+
+    void deleteByUserManualId(Integer manualId);
 }
