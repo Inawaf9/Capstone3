@@ -67,4 +67,13 @@ public class MaintenanceRecordService {
 
         maintenanceRecordRepository.delete(maintenanceRecord);
     }
+
+    //get by       id
+    public MaintenanceRecord getMaintenanceRecordById(Integer maintenanceRecordId){
+        MaintenanceRecord maintenanceRecord=maintenanceRecordRepository.findMaintenanceRecordById(maintenanceRecordId);
+        if(maintenanceRecord==null){
+            throw new ApiException("maintenance record ID not found");
+        }
+        return maintenanceRecord;
+    }
 }

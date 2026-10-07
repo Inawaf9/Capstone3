@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 public interface MaintenanceRecordRepository extends JpaRepository<MaintenanceRecord, Integer> {
 
     MaintenanceRecord findMaintenanceRecordById(Integer id);
+
+    boolean existsByMaintenanceRule_UserManual_Id(Integer manualId);
 }

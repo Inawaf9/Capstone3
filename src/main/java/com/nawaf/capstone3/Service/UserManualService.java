@@ -17,9 +17,42 @@ public class UserManualService {
     private final UserManualRepository userManualRepository;
     private final VehicleRepository vehicleRepository;
 
+<<<<<<< Updated upstream
     public List<UserManual> getUserManuals() {
         return userManualRepository.findAll();
     }
+=======
+      public List<UserManual> getAll(){
+          return userManualRepository.findAll();
+      }
+     //تحققنا من ان اي دي الخاص بالمركبة موجود وبعدها تم الربط
+      public void addUserManual(UserManual userManual){
+          Vehicle vehicle=vehicleRepository.findVehicleById(userManual.getVehicle().getId());
+          if(vehicle==null){
+              throw new ApiException("vehicle id not found ");
+          }
+          userManualRepository.save(userManual);
+      }
+      public UserManual getUserManualById(Integer userManualId){
+          UserManual userManual=userManualRepository.findUserManualById(userManualId);
+          if(userManual==null){
+              throw new ApiException("user manual id not found");
+          }
+          return userManual;
+      }
+
+      //نتناقش ايش لازم نعدل واذا التعديلات الثانية لازمها اند بوينت مختلفة
+      public void updateUserManual(Integer userManualId, UserManual userManual){
+          UserManual oldUserManual=userManualRepository.findUserManualById(userManualId);
+          if(oldUserManual==null){
+              throw new ApiException("userManual id not found ");
+          }
+          oldUserManual.setFileUrl(userManual.getFileUrl());
+          oldUserManual.setMaintenanceRules(userManual.getMaintenanceRules());
+          oldUserManual.setStatus(userManual.getStatus());
+          oldUserManual.setVehicle(userManual.getVehicle());
+          userManual.setUploadedAt(userManual.getUploadedAt());
+>>>>>>> Stashed changes
 
     public UserManual getUserManualById(Integer id) {
         UserManual userManual = userManualRepository.findUserManualById(id);

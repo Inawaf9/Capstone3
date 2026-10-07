@@ -44,6 +44,7 @@ public class MaintenanceRuleService {
 
         if (maintenanceRule == null) throw new ApiException("Maintenance rule not found");
 
+<<<<<<< Updated upstream
         maintenanceRule.setServiceName(updateMaintenanceRule.getServiceName());
         maintenanceRule.setDescription(updateMaintenanceRule.getDescription());
         maintenanceRule.setTriggerType(updateMaintenanceRule.getTriggerType());
@@ -51,6 +52,10 @@ public class MaintenanceRuleService {
         maintenanceRule.setMonthInterval(updateMaintenanceRule.getMonthInterval());
         maintenanceRule.setCondition(updateMaintenanceRule.getCondition());
         maintenanceRule.setNotes(updateMaintenanceRule.getNotes());
+=======
+
+        maintenanceRuleRepository.save(oldMaintenanceRule);
+>>>>>>> Stashed changes
 
         maintenanceRuleRepository.save(maintenanceRule);
     }
@@ -62,4 +67,19 @@ public class MaintenanceRuleService {
 
         maintenanceRuleRepository.delete(maintenanceRule);
     }
+<<<<<<< Updated upstream
+=======
+
+    public MaintenanceRule getMaintenanceRuleById(Integer maintenanceRuleId){
+        MaintenanceRule maintenanceRule=maintenanceRuleRepository.findMaintenanceRuleById(maintenanceRuleId);
+        if(maintenanceRule==null){
+            throw new ApiException("maintenance rule id not found");
+        }
+        return maintenanceRule;
+    }
+
+//    public void
+
+
+>>>>>>> Stashed changes
 }
