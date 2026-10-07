@@ -72,48 +72,4 @@ public class MaintenanceRuleService {
 
         maintenanceRuleRepository.delete(maintenanceRule);
     }
-
-    public List<MaintenanceRule> analyzeVehicle(Integer vehicleId) {
-        Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
-        if (vehicle == null) throw new ApiException("Vehicle not found");
-
-        VehicleMaintenanceResponse maintenance = vehicleDatabaseClient.getMaintenance(vehicle.getVin());
-
-        MaintenanceAiRequest request = new MaintenanceAiRequest(maintenance, null);
-
-        try {
-            String json = objectMapper.writeValueAsString(request);
-
-            MaintenanceAiResponse response = openRouterClient.analyzeText(
-                    MaintenancePrompts.NORMALIZE_MAINTENANCE,
-                    json,
-                    MaintenanceAiResponse.class
-            );
-
-            if (response == null || response.rules() == null || response.rules().isEmpty())
-                throw new ApiException("No maintenance rules found");
-
-            List<MaintenanceRule> rules = response.rules().stream()
-                    .map(aiRule -> {
-                        MaintenanceRule rule = new MaintenanceRule();
-                        rule.setServiceName(aiRule.serviceName());
-                        rule.setDescription(aiRule.description());
-                        rule.setCategory(aiRule.category());
-                        rule.setAction(aiRule.action());
-                        rule.setKilometers(aiRule.kilometers());
-                        rule.setSpecification(aiRule.specification());
-                        rule.setCapacity(aiRule.capacity());
-                        rule.setSource(aiRule.sources() == null ? null : String.join(", ", aiRule.sources()));
-                        rule.setVehicle(vehicle);
-
-                        return rule;
-                    })
-                    .toList();
-
-            return maintenanceRuleRepository.saveAll(rules);
-
-        } catch (JsonProcessingException exception) {
-            throw new ApiException("Failed to process vehicle maintenance data");
-        }
-    }
 }
