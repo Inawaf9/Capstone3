@@ -42,9 +42,4 @@ public class MaintenanceRuleController {
         maintenanceRuleService.deleteMaintenanceRule(id);
         return ResponseEntity.status(200).body(new ApiResponse("Maintenance rule deleted successfully"));
     }
-
-    @PostMapping("/analyze/{vehicleId}")
-    public ResponseEntity<?> analyzeVehicle(@PathVariable Integer vehicleId) {
-        return ResponseEntity.status(200).body(maintenanceRuleService.analyzeVehicle(vehicleId));
-    }
 }
