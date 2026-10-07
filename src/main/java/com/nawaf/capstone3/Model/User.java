@@ -58,14 +58,11 @@ public class User {
             message = "Password must contain uppercase, lowercase, number, and special character"
     )
     @Column(nullable = false)
-    @JsonIgnore
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonIgnore
     private Set<Vehicle> vehicles;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonIgnore
     private Set<Notification> notifications;
 }
