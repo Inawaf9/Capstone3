@@ -1,5 +1,9 @@
 package com.nawaf.capstone3.Client;
 
+
+import org.springframework.ai.content.Media;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.web.multipart.MultipartFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -97,5 +101,34 @@ public class OpenRouterClient {
     @FunctionalInterface
     private interface AiCall<T> {
         T execute();
+    }
+
+    public <T> T analyzeImage(MultipartFile image, String prompt, Class<T> responseType) {
+
+        return executeWithRetry(
+                () -> {
+                    try {
+                        Media media = new Media(
+                                MimeTypeUtils.parseMimeType(image.getContentType()),
+                                image.getResource()
+                        );
+
+                        return chatClient.prompt()
+                                .user(user -> user
+                                        .text(prompt)
+                                        .media(media)
+                                )
+                                .call()
+                                .entity(responseType);
+
+                    }  catch (Exception e) {
+            throw new RuntimeException(
+                    "Failed to analyze image: " + e.getMessage(), e
+            );
+        }
+                },
+                responseType.getSimpleName(),
+                "IMAGE"
+        );
     }
 }

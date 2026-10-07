@@ -26,11 +26,6 @@ public class Receipt {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotBlank(message = "Receipt file URL is required")
-    @Size(max = 2048, message = "Receipt file URL is too long")
-    @Column(nullable = false, length = 2048)
-    private String fileUrl;
-
     @NotNull(message = "Total amount is required")
     @PositiveOrZero(message = "Total amount cannot be negative")
     @Column(nullable = false)

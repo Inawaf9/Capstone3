@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ReceiptDTO {
 
-    private String fileUrl;
     private Double totalAmount;
     private LocalDate extractedDate;
     private String serviceType;

@@ -49,7 +49,6 @@ public class ReceiptService {
 
         if (receipt == null) throw new ApiException("Receipt not found");
 
-        receipt.setFileUrl(updateReceipt.getFileUrl());
         receipt.setTotalAmount(updateReceipt.getTotalAmount());
         receipt.setExtractedDate(updateReceipt.getExtractedDate());
 
@@ -77,7 +76,6 @@ public class ReceiptService {
         List<ReceiptDTO>receiptDTOS=new ArrayList<>();
         for (Receipt receipt:receipts){
             ReceiptDTO dto=new ReceiptDTO(
-            receipt.getFileUrl(),
             receipt.getTotalAmount(),
             receipt.getExtractedDate(),
             receipt.getMaintenanceRecord().getMaintenanceRule().getServiceName()
