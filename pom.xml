@@ -88,6 +88,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
+<<<<<<< HEAD
 
         <dependency>
             <groupId>org.springframework.ai</groupId>
@@ -107,6 +108,12 @@
 
 
 
+=======
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-pdf-document-reader</artifactId>
+        </dependency>
+>>>>>>> 73bfbe3d4ed326a5e0049a12bb6d3162b22cdea4
     </dependencies>
 
     <build>
