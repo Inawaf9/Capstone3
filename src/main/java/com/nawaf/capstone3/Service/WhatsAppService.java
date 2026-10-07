@@ -20,8 +20,16 @@ public class WhatsAppService {
 
         try {
 
+            // Convert Saudi local number to international format
+            String whatsappNumber = phoneNumber;
+
+            if (whatsappNumber.startsWith("0")) {
+                whatsappNumber = "966" + whatsappNumber.substring(1);
+            }
+
             ProcessBuilder processBuilder = new ProcessBuilder(
                     "curl",
+                    "-i",
                     "-s",
                     "-X", "POST",
                     "https://api.whatsloop.net/v1/messages/send-text",
@@ -36,7 +44,7 @@ public class WhatsAppService {
                     }
                     """.formatted(
                             channelId,
-                            phoneNumber,
+                            whatsappNumber,
                             escapeJson(message)
                     )
             );
