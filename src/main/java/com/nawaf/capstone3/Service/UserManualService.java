@@ -4,6 +4,7 @@ import com.nawaf.capstone3.Api.ApiException;
 import com.nawaf.capstone3.Model.MaintenanceRule;
 import com.nawaf.capstone3.Model.UserManual;
 import com.nawaf.capstone3.Model.Vehicle;
+import com.nawaf.capstone3.Repository.MaintenanceRuleRepository;
 import com.nawaf.capstone3.Repository.UserManualRepository;
 import com.nawaf.capstone3.Repository.VehicleRepository;
 import lombok.AllArgsConstructor;
@@ -17,6 +18,8 @@ import java.util.List;
 public class UserManualService {
     private final UserManualRepository userManualRepository;
     private final VehicleRepository vehicleRepository;
+    private final MaintenanceRuleRepository maintenanceRuleRepository;
+
 
     public List<UserManual> getAll(){
         return userManualRepository.findAll();
@@ -63,6 +66,21 @@ public class UserManualService {
             throw new ApiException("user id not found , can not be deleted");
         }
         userManualRepository.deleteById(userManualId);
+    }
+
+    //4
+    public List<MaintenanceRule> getRulesByUserManualId(Integer userManualId) {
+        UserManual userManual = userManualRepository.findUserManualById(userManualId);
+
+        if (userManual == null) {
+            throw new ApiException("user manual id not found");
+        }
+        //اذا الحالة مازالت في التحليل يفرق بيها المستخدم من الحالة الفارغة
+        if (!"COMPLETED".equals(userManual.getStatus())) {
+            throw new ApiException("manual analysis is not completed yet, current status: " + userManual.getStatus());
+        }
+
+        return maintenanceRuleRepository.findMaintenanceRulesByUserManualIdOrderByServiceName(userManualId);
     }
 
 

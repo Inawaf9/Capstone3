@@ -1,12 +1,17 @@
 package com.nawaf.capstone3.Controller;
 
 import com.nawaf.capstone3.Api.ApiResponse;
+import com.nawaf.capstone3.DTO.DueMaintenanceDTO;
+import com.nawaf.capstone3.DTO.VehicleMaintenanceSummaryDTO;
 import com.nawaf.capstone3.Model.Vehicle;
+import com.nawaf.capstone3.Service.MaintenanceRecordService;
 import com.nawaf.capstone3.Service.VehicleService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/vehicle")
@@ -14,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class VehicleController {
 
     private final VehicleService vehicleService;
+    private final MaintenanceRecordService maintenanceRecordService;
 
     @GetMapping("/get-all")
     public ResponseEntity<?> getVehicles() {
@@ -63,4 +69,21 @@ public class VehicleController {
     public ResponseEntity<?> getUserVehiclesSummary(@PathVariable Integer userId) {
         return ResponseEntity.status(200).body(vehicleService.getUserVehiclesSummary(userId));
     }
+
+//5
+    @GetMapping("/get-Vehicle-Maintenance-History/{vehicleId}")
+    public ResponseEntity<?> getVehicleMaintenanceHistory(@PathVariable Integer vehicleId) {
+        VehicleMaintenanceSummaryDTO summary = maintenanceRecordService.getVehicleMaintenanceHistory(vehicleId);
+        return ResponseEntity.status(200).body(summary);
+    }
+
+    //7
+//الصيانات المستحقة بناءا على ان remaining km يكون بقيمة سالبة
+    @GetMapping("/get-Due-Maintenances/{vehicleId}")
+    public ResponseEntity<List<DueMaintenanceDTO>> getDueMaintenances(@PathVariable Integer vehicleId) {
+        List<DueMaintenanceDTO> dueMaintenances = maintenanceRecordService.getDueMaintenances(vehicleId);
+        return ResponseEntity.status(200).body(dueMaintenances);
+    }
+
+
 }

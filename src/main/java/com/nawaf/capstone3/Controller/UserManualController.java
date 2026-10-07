@@ -73,5 +73,11 @@ public class UserManualController {
         return Map.of("manualId", id, "status", manualAnalysisService.getStatus(id));
     }
 
+    //4
+    @GetMapping("/get-rules/{userManualId}")
+    public ResponseEntity<?> getRules(@PathVariable Integer userManualId) {
+        return ResponseEntity.status(200).body(userManualService.getRulesByUserManualId(userManualId));
+    }
+
 
 }
