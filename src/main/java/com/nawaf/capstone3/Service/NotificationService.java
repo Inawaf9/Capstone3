@@ -174,6 +174,51 @@ public class NotificationService {
 
 
 
+    public String testMaintenanceWhatsApp(Integer vehicleId) {
+
+        Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
+
+        if (vehicle == null) {
+            throw new ApiException("Vehicle not found");
+        }
+
+        List<MaintenanceRecord> records =
+                maintenanceRecordRepository.findMaintenanceRecordByVehicle(vehicle);
+
+        for (MaintenanceRecord record : records) {
+
+            MaintenanceRule rule = record.getMaintenanceRule();
+
+            boolean due = false;
+
+            if (rule.getKilometers() != null) {
+                due = vehicle.getCurrentKilometers() - record.getKilometers() >= rule.getKilometers();
+            }
+
+            if (rule.getMonthInterval() != null) {
+                boolean timeDue = !LocalDate.now().isBefore(record.getServiceDate().plusMonths(rule.getMonthInterval())
+                );
+
+                due = due || timeDue;
+            }
+
+            if (due) {
+
+                String message = "Maintenance Due: " + rule.getServiceName();
+
+                String phoneNumber = vehicle.getUser().getPhoneNumber();
+
+                whatsAppService.sendMessage(phoneNumber, message
+                );
+                return message;
+            }
+        }
+
+        return "No maintenance due";
+    }
+
+
+
     public Notification retryNotification(Integer notificationId) {
 
         Notification notification = getNotificationById(notificationId);

@@ -4,11 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nawaf.capstone3.Api.ApiException;
 import com.nawaf.capstone3.Client.OpenRouterClient;
-import com.nawaf.capstone3.Client.VehicleDatabaseClient;
-import com.nawaf.capstone3.DTO.AI.MaintenanceAiRequest;
-import com.nawaf.capstone3.DTO.AI.MaintenanceAiResponse;
-import com.nawaf.capstone3.DTO.VehicleDatabase.VehicleFluidsResponse;
-import com.nawaf.capstone3.DTO.VehicleDatabase.VehicleMaintenanceResponse;
+//import com.nawaf.capstone3.Client.VehicleDatabaseClient;
+//import com.nawaf.capstone3.DTO.AI.MaintenanceAiRequest;
+//import com.nawaf.capstone3.DTO.AI.MaintenanceAiResponse;
+//import com.nawaf.capstone3.DTO.VehicleDatabase.VehicleFluidsResponse;
+//import com.nawaf.capstone3.DTO.VehicleDatabase.VehicleMaintenanceResponse;
 import com.nawaf.capstone3.Model.MaintenanceRule;
 import com.nawaf.capstone3.Model.Vehicle;
 import com.nawaf.capstone3.Repository.MaintenanceRuleRepository;
@@ -23,7 +23,7 @@ import java.util.List;
 public class MaintenanceRuleService {
     private final MaintenanceRuleRepository maintenanceRuleRepository;
     private final VehicleRepository vehicleRepository;
-    private final VehicleDatabaseClient vehicleDatabaseClient;
+   // private final VehicleDatabaseClient vehicleDatabaseClient;
     private final OpenRouterClient openRouterClient;
 
     private final ObjectMapper objectMapper = new ObjectMapper();

@@ -67,4 +67,10 @@ public class NotificationController {
 
         return ResponseEntity.status(200).body(new ApiResponse("Monthly report sent successfully"));
     }
+
+    @PostMapping("/test-maintenance/{vehicleId}")
+    public ResponseEntity<?> testMaintenanceWhatsApp(@PathVariable Integer vehicleId) {
+        String result = notificationService.testMaintenanceWhatsApp(vehicleId);
+        return ResponseEntity.status(200).body(new ApiResponse(result));
+    }
 }
