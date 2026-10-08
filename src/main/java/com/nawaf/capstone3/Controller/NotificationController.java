@@ -43,7 +43,6 @@ public class NotificationController {
         return ResponseEntity.status(200).body(new ApiResponse("Notification deleted successfully"));
     }
 
-
     @PostMapping("/check/{vehicleId}")
     public ResponseEntity<?>checkMaintenance(@PathVariable Integer vehicleId){
         return ResponseEntity.status(200).body(notificationService.checkMaintenance(vehicleId));
@@ -59,18 +58,22 @@ public class NotificationController {
         return ResponseEntity.status(200).body(notificationService.retryNotification(notificationId));
     }
 
-
     @PostMapping("/vehicle/{vehicleId}/monthly-report")
     public ResponseEntity<?> sendMonthlyReport(@PathVariable Integer vehicleId) {
 
-        notificationService.sendMonthlyReport(vehicleId);
-
-        return ResponseEntity.status(200).body(new ApiResponse("Monthly report sent successfully"));
+        String outcome = notificationService.sendMonthlyReport(vehicleId);
+        return ResponseEntity.status("FAILED".equals(outcome) ? 502 : 200).body(new ApiResponse(outcome));
     }
 
     @PostMapping("/test-maintenance/{vehicleId}")
     public ResponseEntity<?> testMaintenanceWhatsApp(@PathVariable Integer vehicleId) {
         String result = notificationService.testMaintenanceWhatsApp(vehicleId);
         return ResponseEntity.status(200).body(new ApiResponse(result));
+    }
+
+    @PostMapping("/test-monthly-report/{vehicleId}")
+    public ResponseEntity<?> testMonthlyReport(@PathVariable Integer vehicleId) {
+        notificationService.testMonthlyReport(vehicleId);
+        return ResponseEntity.status(200).body(new ApiResponse("Test monthly report email sent successfully"));
     }
 }

@@ -416,6 +416,47 @@ The project provides CRUD operations for the main entities.
 
 # Architecture
 
+## VIN maintenance analysis
+
+`POST /api/v1/maintenance-rule/analyze/{vehicleId}` uses the registered vehicle's VIN
+to call Vehicle Databases `/vehicle-maintenance/v4/{vin}`, then sends the structured
+schedule to OpenRouter. The Fluids API is optional and is not called by this endpoint.
+Direct Google Gemini and uploaded-manual analysis are no longer used.
+
+`MaintenanceRule.kilometers` is an **absolute scheduled odometer reading**. Oil at
+10,000 km and oil at 20,000 km are separate entries. Explicit kilometers are retained;
+miles are converted only when kilometers are absent, using 1.609344 and rounding to
+the nearest kilometer. Missing or invalid mileage causes analysis to fail, without
+inventing a schedule or saving partial results.
+
+The service validates source references and complete coverage of each AI batch,
+then saves validated rules in one transaction under a vehicle lock. Matching normalized
+service/action/mileage entries are reused; existing rule IDs, notes, completed records,
+and receipts are retained. AI normalization remains model-dependent: different names
+for the same service across runs may require review. A completed record closes its
+specific scheduled rule; reminders do not treat mileage as a recurring interval.
+
+Configure `DB_USERNAME`, `DB_PASSWORD`, optional `DB_URL`,
+`OPENROUTER_API_KEY`, `VEHICLE_DATABASES_API_KEY`, `MAIL_USERNAME`,
+`MAIL_PASSWORD`, and `WHATSLOOP_TOKEN`. OpenRouter is the only AI provider; a
+`google/...` model routed through OpenRouter does not require a Gemini API key.
+
+### Validation and existing databases
+
+Use Java 25 and run `mvn clean package -Dmaven.test.skip=true`.
+There is no test source directory, test profile, or test-only dependency. Packaging
+compiles the application without starting it or connecting to the database/providers.
+
+No production database migration is included or executed. Before deploying against
+an existing database, confirm `maintenance_rule.vehicle_id` and
+`maintenance_rule.maintenance_condition` match the restored mappings. If a deployed
+manual-workflow schema instead links rules through manuals, first back up the database,
+backfill vehicle associations while preserving rule IDs and dependent records, and
+validate all references. Any `rule_condition` data also needs an explicit migration
+to `maintenance_condition`. Review and approve that migration separately; do not drop
+legacy tables or use Hibernate schema updates to migrate data. The default is now
+`ddl-auto=validate`, so an incompatible schema fails startup without being rewritten.
+
 Sayyan follows a layered Spring Boot architecture to separate responsibilities between different parts of the application.
 
 ```text
@@ -520,3 +561,69 @@ This allows vehicle owners to better understand their vehicles, maintain them on
 ## صَيّان | Sayyan
 
 > **Know your vehicle. Maintain it on time. Keep its history organized.**
+
+
+## Backend repair and deployment notes
+
+See [BACKEND_REPAIR.md](BACKEND_REPAIR.md) for the mapping of all 45 audit findings,
+validation results, compatibility changes, and the complete changed-file inventory.
+
+### Runtime configuration
+
+Use Java 25 and Maven. Set the required environment variables outside the repository:
+
+| Variable | Purpose |
+|---|---|
+| `DB_USERNAME`, `DB_PASSWORD` | MySQL credentials; no hardcoded defaults |
+| `DB_URL` | Optional JDBC URL; defaults to the existing localhost:8889/capstone3 location |
+| `OPENROUTER_API_KEY` | OpenRouter credential |
+| `OPENROUTER_MODEL` | Optional model override; existing OpenRouter model retained by default |
+| `VEHICLE_DATABASES_API_KEY` | Maintenance API credential |
+| `MAIL_USERNAME`, `MAIL_PASSWORD` | SMTP credentials |
+| `WHATSLOOP_TOKEN` | WhatsLoop credential |
+
+Schema changes are **not automatic**. Initialize a new database or migrate an existing
+one through a separately reviewed procedure. No migration has been executed here.
+No test profile or embedded test database is included.
+
+### Behavior and compatibility
+
+- Existing endpoint paths remain, except the retired manual-upload API.
+- Password hashing is removed by request. New and changed passwords are stored as
+  supplied; password fields remain excluded from JSON responses. User updates may omit
+  `password` to preserve the existing value. Existing stored values are not rewritten.
+  No authentication framework or login endpoint is included.
+- IDs, timestamps, child collections, and notification delivery status are server-controlled.
+- Both mileage-add endpoints synchronize the vehicle odometer transactionally. Historical
+  edits must respect neighboring readings and completed service dates. Latest readings
+  cannot be deleted or lowered. Vehicle updates that raise mileage create a reading.
+  VIN decoding leaves mileage unknown until the user supplies an actual reading.
+- Completed maintenance cannot be future-dated or exceed the known current odometer.
+  A rule cannot be deleted or rescheduled while completed history references it.
+  Deleting parents no longer silently cascades away dependent history.
+- Kilometer schedules are absolute. Completion closes that exact rule. Time-only rules
+  use their latest completed service; without a service date, the time baseline is unknown.
+  Upcoming reminders start within 500 km or 7 days. Overdue means strictly past the threshold.
+- Reminder creation and delivery are serialized with database locks. A generated reminder
+  is reused for its rule/cycle, and successful reminders are throttled for seven days.
+  The existing test-maintenance endpoint now follows normal tracking and throttling.
+- Monthly reports cover the previous calendar month after a complete month of ownership,
+  work without a maintenance record, and return `SENT`, `FAILED`, or a `SKIPPED` reason.
+  Retries use the original channel. `SENT` means the provider accepted the request, not
+  a verified recipient read/delivery receipt.
+- Receipt uploads accept valid JPEG/PNG files up to 5 MB and 20 million pixels.
+  Invalid or incomplete AI output is not saved. The create endpoint returns HTTP 201.
+  Extracted service names remain a preview; persisted receipt records retain their
+  existing amount/date/maintenance-record schema. No line-item storage was invented.
+- AI questions/problems are limited to 200 characters before provider calls. AI context
+  includes at most 50 rules and 50 completed records, with explicit truncation indicators.
+- `ApiException` and `ControllerAdvice` use their original implementations. Handled
+  exceptions return HTTP 400 with `{ "message": "..." }` and the exception message.
+
+### Access control remains a deployment blocker
+
+This bootcamp application still has no authentication system, intentionally. Supplied
+user IDs are not verified identities. User CRUD, global reads, vehicle data, paid AI,
+receipt uploads, and notification endpoints require a real authenticated ownership and
+role boundary before public deployment. This repair adds validation and existing
+user/vehicle association checks without claiming they provide authentication.

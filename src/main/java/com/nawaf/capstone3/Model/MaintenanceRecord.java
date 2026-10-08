@@ -3,6 +3,7 @@ package com.nawaf.capstone3.Model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -31,6 +32,7 @@ public class MaintenanceRecord {
 
     @NotNull(message = "Service date is required")
     @Column(nullable = false)
+    @PastOrPresent(message = "Date cannot be in the future")
     private LocalDate serviceDate;
 
     @NotNull(message = "Cost is required")
@@ -56,9 +58,9 @@ public class MaintenanceRecord {
     @JsonIgnore
     private MaintenanceRule maintenanceRule;
 
-    @OneToMany(mappedBy = "maintenanceRecord", cascade = CascadeType.ALL)
-    private Set<Receipt> receipts;
+    @OneToMany(mappedBy = "maintenanceRecord", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<Receipt> receipts = new java.util.LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "maintenanceRecord", cascade = CascadeType.ALL)
-    private Set<Notification> notifications;
+    @OneToMany(mappedBy = "maintenanceRecord", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<Notification> notifications = new java.util.LinkedHashSet<>();
 }

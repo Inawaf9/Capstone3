@@ -4,13 +4,13 @@ import com.nawaf.capstone3.Api.ApiResponse;
 import com.nawaf.capstone3.Model.Vehicle;
 import com.nawaf.capstone3.Service.VehicleService;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/vehicle")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class VehicleController {
 
     private final VehicleService vehicleService;

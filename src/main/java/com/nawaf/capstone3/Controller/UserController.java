@@ -1,16 +1,16 @@
 package com.nawaf.capstone3.Controller;
 
 import com.nawaf.capstone3.Api.ApiResponse;
-import com.nawaf.capstone3.Model.User;
+import com.nawaf.capstone3.DTO.UserRequest;
 import com.nawaf.capstone3.Service.UserService;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/user")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
@@ -26,13 +26,13 @@ public class UserController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addUser(@Valid @RequestBody User user) {
+    public ResponseEntity<?> addUser(@Valid @RequestBody UserRequest user) {
         userService.addUser(user);
         return ResponseEntity.status(201).body(new ApiResponse("User added successfully"));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Integer id, @Valid @RequestBody User user) {
+    public ResponseEntity<?> updateUser(@PathVariable Integer id, @Valid @RequestBody UserRequest user) {
         userService.updateUser(id, user);
         return ResponseEntity.status(200).body(new ApiResponse("User updated successfully"));
     }

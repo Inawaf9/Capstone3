@@ -1,99 +1,33 @@
 package com.nawaf.capstone3.Service;
 
+import com.nawaf.capstone3.Api.ApiException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import org.springframework.web.client.RestClient;
+import org.springframework.http.MediaType;
+import java.util.Map;
 
 @Service
 public class WhatsAppService {
+    private final RestClient client;
+    private final int channelId;
 
-    @Value("${whatsloop.token}")
-    private String token;
-
-    @Value("${whatsloop.channel-id}")
-    private int channelId;
-
-    public void sendMessage(String phoneNumber, String message) {
-
-        try {
-
-            // Convert Saudi local number to international format
-            String whatsappNumber = phoneNumber;
-
-            if (whatsappNumber.startsWith("0")) {
-                whatsappNumber = "966" + whatsappNumber.substring(1);
-            }
-
-            ProcessBuilder processBuilder = new ProcessBuilder(
-                    "curl",
-                    "-i",
-                    "-s",
-                    "-X", "POST",
-                    "https://api.whatsloop.net/v1/messages/send-text",
-                    "-H", "Authorization: Bearer " + token,
-                    "-H", "Content-Type: application/json",
-                    "-d",
-                    """
-                    {
-                        "channel_id": %d,
-                        "to": "%s",
-                        "message": "%s"
-                    }
-                    """.formatted(
-                            channelId,
-                            whatsappNumber,
-                            escapeJson(message)
-                    )
-            );
-
-            processBuilder.redirectErrorStream(true);
-
-            Process process = processBuilder.start();
-
-            StringBuilder response = new StringBuilder();
-
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(
-                            process.getInputStream(),
-                            StandardCharsets.UTF_8
-                    ))) {
-
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-            }
-
-            int exitCode = process.waitFor();
-
-            System.out.println("WhatsLoop response: " + response);
-            System.out.println("curl exit code: " + exitCode);
-
-            if (exitCode != 0) {
-                throw new RuntimeException(
-                        "WhatsLoop request failed: " + response
-                );
-            }
-
-        } catch (Exception e) {
-
-            throw new RuntimeException(
-                    "Failed to send WhatsApp message: " + e.getMessage(),
-                    e
-            );
-        }
+    public WhatsAppService(RestClient.Builder builder, @Value("${whatsloop.base-url}") String baseUrl,
+            @Value("${whatsloop.token}") String token, @Value("${whatsloop.channel-id}") int channelId) {
+        this.client = builder.clone().baseUrl(baseUrl).defaultHeader("Authorization", "Bearer " + token).build();
+        this.channelId = channelId;
     }
 
-    private String escapeJson(String text) {
-
-        return text
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r");
+    public void sendMessage(String phoneNumber, String message) {
+        if (phoneNumber == null || !phoneNumber.matches("^(05[0-9]{8}|9665[0-9]{8})$")
+                || message == null || message.isBlank()) throw new ApiException("Invalid notification recipient or message");
+        String number = phoneNumber.startsWith("0") ? "966" + phoneNumber.substring(1) : phoneNumber;
+        // retrieve() throws for HTTP errors. No process arguments, manual JSON escaping, or response logging.
+        Map<?, ?> response = client.post().uri("/messages/send-text").contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("channel_id", channelId, "to", number, "message", message))
+                .retrieve().body(Map.class);
+        // WhatsLoop v1 documents a boolean success envelope; fail closed on unknown/empty responses.
+        if (response == null || !Boolean.TRUE.equals(response.get("success")))
+            throw new ApiException("WhatsLoop rejected the message");
     }
 }

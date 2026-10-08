@@ -41,7 +41,7 @@ public class Vehicle {
     private String model;
 
     @NotNull(message = "Year is required")
-    @Positive(message = "Year must be a positive number")
+    @Min(value = 1886, message = "Year must be 1886 or later")
     @Column(nullable = false)
     private Integer year;
 
@@ -65,15 +65,20 @@ public class Vehicle {
     @JsonIgnore
     private User user;
 
-    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
-    private Set<KilometerRecord> kilometerRecords;
+    @OneToMany(mappedBy = "vehicle", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<KilometerRecord> kilometerRecords = new java.util.LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
-    private Set<AiChatHistory> aiChatHistories;
+    @OneToMany(mappedBy = "vehicle", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<AiChatHistory> aiChatHistories = new java.util.LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
-    private Set<MaintenanceRecord> maintenanceRecords;
+    @OneToMany(mappedBy = "vehicle", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<MaintenanceRecord> maintenanceRecords = new java.util.LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
-    private Set<MaintenanceRule> maintenanceRules;
+    @OneToMany(mappedBy = "vehicle", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<MaintenanceRule> maintenanceRules = new java.util.LinkedHashSet<>();
+    @AssertTrue(message = "Vehicle year cannot exceed next year")
+    @JsonIgnore
+    public boolean isYearValid() {
+        return year == null || year <= java.time.LocalDate.now().getYear() + 1;
+    }
 }

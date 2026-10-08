@@ -14,7 +14,6 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Integer> {
     Receipt findReceiptById(Integer id);
     List<Receipt>findReceiptsByMaintenanceRecord_Vehicle_Id(Integer vehicleId);
 
-
     @Query("""
 SELECT COALESCE(SUM(r.totalAmount),0)
 FROM Receipt r

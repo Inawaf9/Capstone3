@@ -10,6 +10,7 @@ import com.nawaf.capstone3.Repository.ReceiptRepository;
 import com.nawaf.capstone3.Repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,27 +35,34 @@ public class ReceiptService {
         return receipt;
     }
 
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public void addReceipt(Integer maintenanceRecordId, Receipt receipt) {
         MaintenanceRecord maintenanceRecord = maintenanceRecordRepository.findMaintenanceRecordById(maintenanceRecordId);
 
         if (maintenanceRecord == null) throw new ApiException("Maintenance record not found");
 
+        validateAmount(receipt);
+        receipt.setId(null);
+        receipt.setUploadedAt(null);
         receipt.setMaintenanceRecord(maintenanceRecord);
 
         receiptRepository.save(receipt);
     }
 
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public void updateReceipt(Integer id, Receipt updateReceipt) {
         Receipt receipt = receiptRepository.findReceiptById(id);
 
         if (receipt == null) throw new ApiException("Receipt not found");
 
+        validateAmount(updateReceipt);
         receipt.setTotalAmount(updateReceipt.getTotalAmount());
         receipt.setExtractedDate(updateReceipt.getExtractedDate());
 
         receiptRepository.save(receipt);
     }
 
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public void deleteReceipt(Integer id) {
         Receipt receipt = receiptRepository.findReceiptById(id);
 
@@ -62,8 +70,6 @@ public class ReceiptService {
 
         receiptRepository.delete(receipt);
     }
-
-
 
     public List<ReceiptDTO>getAllReceiptForVehicle(Integer vehicleId){
         Vehicle vehicle=vehicleRepository.findVehicleById(vehicleId);
@@ -91,7 +97,6 @@ public class ReceiptService {
      return receiptDTOS;
     }
 
-
     public Double getTotalReceiptAmountByVehicleId(Integer vehicleId){
 
         Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
@@ -100,5 +105,11 @@ public class ReceiptService {
         }
 
       return receiptRepository.getTotalAmountByVehicleId(vehicleId);
+    }
+    private void validateAmount(Receipt receipt) {
+        if (receipt.getTotalAmount() == null || !Double.isFinite(receipt.getTotalAmount()) || receipt.getTotalAmount() < 0)
+            throw new ApiException("Receipt amount must be finite and nonnegative");
+        if (receipt.getExtractedDate() == null || receipt.getExtractedDate().isAfter(java.time.LocalDate.now()))
+            throw new ApiException("Receipt date must be today or earlier");
     }
 }

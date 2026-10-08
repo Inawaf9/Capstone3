@@ -7,6 +7,7 @@ import com.nawaf.capstone3.Repository.AiChatHistoryRepository;
 import com.nawaf.capstone3.Repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,16 +30,20 @@ public class AiChatHistoryService {
         return aiChatHistory;
     }
 
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public void addAiChatHistory(Integer vehicleId, AiChatHistory aiChatHistory) {
         Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
 
         if (vehicle == null) throw new ApiException("Vehicle not found");
 
+        aiChatHistory.setId(null);
+        aiChatHistory.setCreatedAt(null);
         aiChatHistory.setVehicle(vehicle);
 
         aiChatHistoryRepository.save(aiChatHistory);
     }
 
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public void updateAiChatHistory(Integer id, AiChatHistory updateAiChatHistory) {
         AiChatHistory aiChatHistory = aiChatHistoryRepository.findAiChatHistoryById(id);
 
@@ -50,6 +55,7 @@ public class AiChatHistoryService {
         aiChatHistoryRepository.save(aiChatHistory);
     }
 
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public void deleteAiChatHistory(Integer id) {
         AiChatHistory aiChatHistory = aiChatHistoryRepository.findAiChatHistoryById(id);
 

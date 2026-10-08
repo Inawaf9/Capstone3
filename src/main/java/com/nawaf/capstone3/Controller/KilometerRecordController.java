@@ -5,13 +5,13 @@ import com.nawaf.capstone3.DTO.KilometerRecordDTO;
 import com.nawaf.capstone3.Model.KilometerRecord;
 import com.nawaf.capstone3.Service.KilometerRecordService;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/kilometer-record")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class KilometerRecordController {
 
     private final KilometerRecordService kilometerRecordService;
