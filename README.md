@@ -627,3 +627,21 @@ user IDs are not verified identities. User CRUD, global reads, vehicle data, pai
 receipt uploads, and notification endpoints require a real authenticated ownership and
 role boundary before public deployment. This repair adds validation and existing
 user/vehicle association checks without claiming they provide authentication.
+
+---
+
+# Nawaf — Extra Endpoints
+
+The following endpoints are assigned to Nawaf. They provide business functionality beyond standard CRUD operations.
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/v1/vehicle/decode-vin/{userId}` | Decode a VIN and register the vehicle for the user. Pass `vin` as a query parameter. |
+| GET | `/api/v1/vehicle/{userId}/{vehicleId}/summary` | Get a summary for one vehicle. |
+| GET | `/api/v1/vehicle/user/{userId}/vehicles-summary` | Get summaries for all vehicles owned by a user. |
+| POST | `/api/v1/kilometer-record/{userId}/{vehicleId}/record` | Record an odometer reading for a vehicle. |
+| GET | `/api/v1/kilometer-record/{userId}/{vehicleId}/latest` | Get the latest recorded odometer reading. |
+| GET | `/api/v1/kilometer-record/{userId}/{vehicleId}/history` | Get the vehicle's odometer reading history. |
+| GET | `/api/v1/kilometer-record/{userId}/{vehicleId}/average-monthly` | Calculate average monthly distance traveled. |
+| GET | `/api/v1/kilometer-record/{userId}/{vehicleId}/distance-traveled` | Calculate the total recorded distance traveled. |
+| GET | `/api/v1/kilometer-record/{userId}/{vehicleId}/monthly-distance` | Get distance traveled grouped by month. |
