@@ -53,4 +53,9 @@ public class MaintenanceRecordController {
         maintenanceRecordService.deleteMaintenanceRecord(id);
         return ResponseEntity.status(200).body(new ApiResponse("Maintenance record deleted successfully"));
     }
+
+    @GetMapping("/cost/{vehicleId}/{year}")
+    public ResponseEntity<?>getMaintenanceCostByYear(@PathVariable Integer vehicleId ,@PathVariable Integer year){
+        return ResponseEntity.status(200).body(maintenanceRecordService.getMaintenanceCostByYear(vehicleId,year));
+    }
 }

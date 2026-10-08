@@ -42,4 +42,17 @@ public class ReceiptController {
         receiptService.deleteReceipt(id);
         return ResponseEntity.status(200).body(new ApiResponse("Receipt deleted successfully"));
     }
+
+
+    @GetMapping("/vehicle/{vehicleId}")
+    public ResponseEntity<?> getAllReceiptForVehicle(@PathVariable Integer vehicleId) {
+        return ResponseEntity.status(200).body(receiptService.getAllReceiptForVehicle(vehicleId));
+    }
+
+
+    @GetMapping("/vehicle/{vehicleId}/total")
+    public ResponseEntity<?>getTotalReceiptAmountByVehicleId(@PathVariable Integer vehicleId){
+        return ResponseEntity.status(200).body(receiptService.getTotalReceiptAmountByVehicleId(vehicleId));
+    }
+
 }

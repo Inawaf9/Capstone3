@@ -8,4 +8,7 @@ import org.springframework.stereotype.Repository;
 public interface NotificationRepository extends JpaRepository<Notification, Integer> {
 
     Notification findNotificationById(Integer id);
+    Notification findTopByMaintenanceRecordIdAndStatusOrderBySentAtDesc(Integer maintenanceRecordId, String status);
+    Notification findTopByMaintenanceRecordIdAndStatus(Integer maintenanceRecordId, String status);
+    Notification findTopByMaintenanceRecordVehicleIdAndTypeOrderBySentAtDesc(Integer vehicleId, String type);
 }

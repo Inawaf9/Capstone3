@@ -1,13 +1,14 @@
 package com.nawaf.capstone3.Service;
 
 import com.nawaf.capstone3.Api.ApiException;
-import com.nawaf.capstone3.Model.Notification;
-import com.nawaf.capstone3.Model.User;
-import com.nawaf.capstone3.Repository.NotificationRepository;
-import com.nawaf.capstone3.Repository.UserRepository;
+import com.nawaf.capstone3.Model.*;
+import com.nawaf.capstone3.Repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,6 +17,10 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    private final VehicleRepository vehicleRepository;
+    private final MaintenanceRecordRepository maintenanceRecordRepository;
+    private final WhatsAppService whatsAppService;
+    private final EmailService emailService;
 
     public List<Notification> getNotifications() {
         return notificationRepository.findAll();
@@ -61,4 +66,392 @@ public class NotificationService {
 
         notificationRepository.delete(notification);
     }
-}
+
+
+
+
+    public List<Notification> checkMaintenance(Integer vehicleId) {
+
+        Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
+
+        if (vehicle == null) {
+            throw new ApiException("Vehicle not found");
+        }
+
+        List<MaintenanceRecord> records =
+                maintenanceRecordRepository.findMaintenanceRecordByVehicle(vehicle);
+
+        List<Notification> notifications = new ArrayList<>();
+
+        for (MaintenanceRecord record : records) {
+
+            MaintenanceRule rule = record.getMaintenanceRule();
+
+            boolean due = false;
+
+                  // فحص الصيانة حسب الكيلومترات
+            if (rule.getKilometers() != null) {
+                due = vehicle.getCurrentKilometers() - record.getKilometers() >= rule.getKilometers();
+            }
+
+            // فحص الصيانة حسب الوقت
+            if (rule.getMonthInterval() != null) {
+                boolean timeDue = !LocalDate.now().isBefore(record.getServiceDate().plusMonths(rule.getMonthInterval()));
+                due = due || timeDue;
+            }
+
+            if (due) {
+
+                Notification pendingNotification = notificationRepository.findTopByMaintenanceRecordIdAndStatus(record.getId(), "PENDING");
+                if (pendingNotification != null) {
+                    // فيه تنبيه PENDING موجود، نرجعه
+                    notifications.add(pendingNotification);
+
+                } else {
+                    // ما فيه PENDING، ننشئ واحد جديد
+                    Notification notification = new Notification();
+
+                    notification.setType("MAINTENANCE_DUE");
+                    notification.setChannel("WHATSAPP");
+                    notification.setStatus("PENDING");
+
+                    notification.setMessage("Maintenance Due: " + rule.getServiceName());
+
+                    notification.setUser(vehicle.getUser());
+                    notification.setMaintenanceRecord(record);
+
+                    notifications.add(notificationRepository.save(notification)
+                    );
+                }
+            }
+            }
+
+
+        return notifications;
+    }
+
+    public List<Notification> checkAndSendMaintenance(Integer vehicleId) {
+
+        List<Notification> notifications = checkMaintenance(vehicleId);
+
+        for (Notification notification : notifications) {
+
+            if (notification.getStatus().equals("PENDING")) {
+                Notification lastNotification = notificationRepository.findTopByMaintenanceRecordIdAndStatusOrderBySentAtDesc(notification.getMaintenanceRecord().getId(), "SENT");
+
+
+                boolean canSend = lastNotification == null || lastNotification.getSentAt() == null || !lastNotification.getSentAt().plusDays(7).isAfter(LocalDateTime.now());
+                if (canSend) {
+                    try {
+                        String phoneNumber = notification.getUser().getPhoneNumber();
+
+                        whatsAppService.sendMessage(phoneNumber, notification.getMessage()
+                        );
+
+                        notification.setStatus("SENT");
+                        notification.setSentAt(LocalDateTime.now());
+
+                        notificationRepository.save(notification);
+
+                    } catch (Exception e) {
+
+                        notification.setStatus("FAILED");
+                        notificationRepository.save(notification);
+                    }
+                }
+            }
+        }
+        return notifications;
+    }
+
+
+    public void checkAllVehicles() {
+        List<Vehicle> vehicles = vehicleRepository.findAll();
+        for (Vehicle vehicle : vehicles) {
+            checkAndSendMaintenance(vehicle.getId());
+        }
+    }
+
+
+
+    public String testMaintenanceWhatsApp(Integer vehicleId) {
+
+        Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
+
+        if (vehicle == null) {
+            throw new ApiException("Vehicle not found");
+        }
+
+        List<MaintenanceRecord> records =
+                maintenanceRecordRepository.findMaintenanceRecordByVehicle(vehicle);
+
+        for (MaintenanceRecord record : records) {
+
+            MaintenanceRule rule = record.getMaintenanceRule();
+
+            boolean due = false;
+
+            if (rule.getKilometers() != null) {
+                due = vehicle.getCurrentKilometers() - record.getKilometers() >= rule.getKilometers();
+            }
+
+            if (rule.getMonthInterval() != null) {
+                boolean timeDue = !LocalDate.now().isBefore(record.getServiceDate().plusMonths(rule.getMonthInterval())
+                );
+
+                due = due || timeDue;
+            }
+
+            if (due) {
+
+                String message = "Maintenance Due: " + rule.getServiceName();
+
+                String phoneNumber = vehicle.getUser().getPhoneNumber();
+
+                whatsAppService.sendMessage(phoneNumber, message
+                );
+                return message;
+            }
+        }
+
+        return "No maintenance due";
+    }
+
+
+
+    public Notification retryNotification(Integer notificationId) {
+
+        Notification notification = getNotificationById(notificationId);
+
+        // نسمح بإعادة الإرسال فقط إذا كان الإرسال السابق فاشل
+        if (!notification.getStatus().equals("FAILED")) {
+            throw new ApiException("Notification is not failed");
+        }
+
+        try {
+            String phoneNumber = notification.getUser().getPhoneNumber();
+
+            whatsAppService.sendMessage(
+                    phoneNumber,
+                    notification.getMessage()
+            );
+
+            // إذا نجح الإرسال
+            notification.setStatus("SENT");
+            notification.setSentAt(LocalDateTime.now());
+
+            return notificationRepository.save(notification);
+
+        } catch (Exception e) {
+
+            // إذا فشلت المحاولة مرة ثانية
+            notification.setStatus("FAILED");
+            notificationRepository.save(notification);
+            throw new ApiException("Failed to resend notification");
+        }
+    }
+
+
+
+
+    public void sendMonthlyReport(Integer vehicleId) {
+
+        Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
+
+        if (vehicle == null) {
+            throw new ApiException("Vehicle not found");
+        }
+
+        // نجيب سجل صيانة للسيارة حتى نربط به الـNotification
+        MaintenanceRecord maintenanceRecord = maintenanceRecordRepository.findTopByVehicleIdOrderByServiceDateDesc(vehicleId);
+        if (maintenanceRecord == null) {
+            throw new ApiException("Vehicle has no maintenance record");
+        }
+
+        LocalDateTime firstDate = vehicle.getCreatedAt();
+        LocalDateTime now = LocalDateTime.now();
+
+        // السيارة ما كملت شهر
+        if (firstDate.plusMonths(1).isAfter(now)) {
+            return;
+        }
+
+        // آخر تقرير تم إرساله لهذه السيارة
+        Notification lastReport = notificationRepository.findTopByMaintenanceRecordVehicleIdAndTypeOrderBySentAtDesc(vehicleId, "REPORT"
+                        );
+
+        // إذا آخر تقرير انرسل قبل أقل من شهر، لا نرسل مرة ثانية
+        if (lastReport != null
+                && lastReport.getSentAt() != null
+                && lastReport.getSentAt().plusMonths(1).isAfter(now)) {
+            return;
+        }
+
+        LocalDateTime startDate = firstDate;
+        LocalDateTime endDate = startDate.plusMonths(1);
+
+        // نحدد آخر فترة مكتملة
+        while (!endDate.isAfter(now)) {
+            startDate = endDate;
+            endDate = startDate.plusMonths(1);
+        }
+
+        // نرجع للفترة المكتملة السابقة
+        startDate = startDate.minusMonths(1);
+        endDate = startDate.plusMonths(1);
+
+        String report = buildMonthlyReport(vehicle, startDate, endDate);
+
+        emailService.sendMonthlyReport(
+                vehicle.getUser().getEmail(),
+                vehicle.getUser().getName(),
+                vehicle.getMake() + " " + vehicle.getModel(),
+                report
+        );
+
+
+        Notification notification = new Notification();
+        notification.setType("REPORT");
+        notification.setChannel("EMAIL");
+        notification.setStatus("SENT");
+        notification.setMessage("Monthly vehicle report");
+        notification.setSentAt(LocalDateTime.now());
+        notification.setUser(vehicle.getUser());
+        notification.setMaintenanceRecord(maintenanceRecord);
+
+        notificationRepository.save(notification);
+    }
+
+
+    private String buildMonthlyReport(Vehicle vehicle, LocalDateTime startDate, LocalDateTime endDate
+    ) {
+     //كم صيانة تمت؟
+     //كم مجموع تكلفتها؟
+        int maintenanceCount = 0;
+        double maintenanceCost = 0;
+
+      //كم Receipt؟
+      //كم مجموع مبالغها؟
+        int receiptCount = 0;
+        double receiptTotal = 0;
+
+       //- كم Notification؟
+        //- كم واحدة SENT؟
+        //- كم واحدة FAILED؟
+        int notificationCount = 0;
+        int sentNotifications = 0;
+        int failedNotifications = 0;
+
+        //عشان يعرف بداية ونهاية الكيلومترات.
+        int startKilometers = 0;
+        int endKilometers = 0;
+
+        for (MaintenanceRecord record : vehicle.getMaintenanceRecords()) {
+
+            LocalDateTime serviceDate = record.getServiceDate().atStartOfDay();
+
+            if (!serviceDate.isBefore(startDate) && serviceDate.isBefore(endDate)) {
+               // إذا كانت الصيانة داخل الشهر
+                maintenanceCount++;
+                maintenanceCost += record.getCost();
+
+                if (record.getReceipts() != null) {
+
+                    for (Receipt receipt : record.getReceipts()) {
+
+                        LocalDate receiptDate = receipt.getExtractedDate();
+
+                        if (!receiptDate.isBefore(startDate.toLocalDate()) && receiptDate.isBefore(endDate.toLocalDate())) {
+
+                            receiptCount++;
+                            receiptTotal += receipt.getTotalAmount();
+                        }
+                    }
+                }
+
+                if (record.getNotifications() != null) {
+
+                    for (Notification notification : record.getNotifications()) {
+
+                        if (notification.getCreatedAt() == null) {
+                            continue;
+                        }
+
+                        if (!notification.getCreatedAt().isBefore(startDate) && notification.getCreatedAt().isBefore(endDate)) {
+
+                            notificationCount++;
+
+                            if ("SENT".equals(notification.getStatus())) {
+                                sentNotifications++;
+                            }
+
+                            if ("FAILED".equals(notification.getStatus())) {
+                                failedNotifications++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (KilometerRecord record : vehicle.getKilometerRecords()) {
+
+            if (record.getRecordedAt() == null) {
+                continue;
+            }
+
+            if (!record.getRecordedAt().isBefore(startDate)
+                    && record.getRecordedAt().isBefore(endDate)) {
+
+                if (startKilometers == 0 || record.getRecordedAt().isBefore(startDate)) {
+                    startKilometers = record.getKilometers();
+                }
+
+                endKilometers = record.getKilometers();
+            }
+        }
+        int distance = endKilometers - startKilometers;
+
+        return """
+            Monthly Vehicle Report
+            ----------------------
+
+            Vehicle: %s %s
+            Period: %s → %s
+
+            Maintenance
+            - Services: %d
+            - Total Cost: %.2f SAR
+
+            Receipts
+            - Number: %d
+            - Total: %.2f SAR
+
+            Kilometers
+            - Start: %d KM
+            - End: %d KM
+            - Distance: %d KM
+
+            Notifications
+            - Total: %d
+            - Sent: %d
+            - Failed: %d
+            """.formatted(
+                vehicle.getMake(),
+                vehicle.getModel(),
+                startDate.toLocalDate(),
+                endDate.toLocalDate(),
+                maintenanceCount,
+                maintenanceCost,
+                receiptCount,
+                receiptTotal,
+                startKilometers,
+                endKilometers,
+                distance,
+                notificationCount,
+                sentNotifications,
+                failedNotifications
+        );
+      }
+    }
+

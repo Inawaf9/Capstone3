@@ -42,4 +42,35 @@ public class NotificationController {
         notificationService.deleteNotification(id);
         return ResponseEntity.status(200).body(new ApiResponse("Notification deleted successfully"));
     }
+
+
+    @PostMapping("/check/{vehicleId}")
+    public ResponseEntity<?>checkMaintenance(@PathVariable Integer vehicleId){
+        return ResponseEntity.status(200).body(notificationService.checkMaintenance(vehicleId));
+    }
+
+    @PostMapping("/check-and-send/{vehicleId}")
+    public ResponseEntity<?>checkAndSendMaintenance(@PathVariable Integer vehicleId){
+        return ResponseEntity.status(200).body(notificationService.checkAndSendMaintenance(vehicleId));
+    }
+
+    @PostMapping("/retry/{notificationId}")
+    public ResponseEntity<?>retryNotification(@PathVariable Integer notificationId){
+        return ResponseEntity.status(200).body(notificationService.retryNotification(notificationId));
+    }
+
+
+    @PostMapping("/vehicle/{vehicleId}/monthly-report")
+    public ResponseEntity<?> sendMonthlyReport(@PathVariable Integer vehicleId) {
+
+        notificationService.sendMonthlyReport(vehicleId);
+
+        return ResponseEntity.status(200).body(new ApiResponse("Monthly report sent successfully"));
+    }
+
+    @PostMapping("/test-maintenance/{vehicleId}")
+    public ResponseEntity<?> testMaintenanceWhatsApp(@PathVariable Integer vehicleId) {
+        String result = notificationService.testMaintenanceWhatsApp(vehicleId);
+        return ResponseEntity.status(200).body(new ApiResponse(result));
+    }
 }
