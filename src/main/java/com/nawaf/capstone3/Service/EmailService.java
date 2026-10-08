@@ -33,15 +33,23 @@ public class EmailService {
         );
 
         html = html
-                .replace("{{userName}}", userName)
-                .replace("{{vehicleName}}", vehicleName)
-                .replace("{{report}}", report);
+                .replace("{{userName}}", escape(userName))
+                .replace("{{vehicleName}}", escape(vehicleName))
+                .replace("{{report}}", escape(report));
 
         sendHtmlEmail(
                 to,
                 "Monthly Vehicle Report - " + vehicleName,
                 html
         );
+    }
+
+    public void sendText(String to, String subject, String body) {
+        sendHtmlEmail(to, subject, "<pre style=\"white-space:pre-wrap\">" + escape(body) + "</pre>");
+    }
+
+    private String escape(String text) {
+        return org.springframework.web.util.HtmlUtils.htmlEscape(text == null ? "" : text);
     }
 
     private void sendHtmlEmail(String to, String subject, String html) {
@@ -69,10 +77,9 @@ public class EmailService {
         try {
             ClassPathResource resource = new ClassPathResource(path);
 
-            return new String(
-                    resource.getInputStream().readAllBytes(),
-                    StandardCharsets.UTF_8
-            );
+            try (var stream = resource.getInputStream()) {
+                return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+            }
 
         } catch (IOException e) {
             throw new RuntimeException("Failed to load email template", e);

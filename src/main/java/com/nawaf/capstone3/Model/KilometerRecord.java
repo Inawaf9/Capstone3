@@ -3,7 +3,6 @@ package com.nawaf.capstone3.Model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,7 +24,6 @@ public class KilometerRecord {
     private Integer id;
 
     @NotNull(message = "Kilometers are required")
-    @Positive(message = "Kilometers must be a positive number")
     @Column(nullable = false)
     private Integer kilometers;
 

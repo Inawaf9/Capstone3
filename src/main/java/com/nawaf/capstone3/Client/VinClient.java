@@ -10,7 +10,7 @@ public class VinClient {
     private final RestClient restClient;
 
     public VinClient(RestClient.Builder builder) {
-        this.restClient = builder
+        this.restClient = builder.clone()
                 .baseUrl("https://vpic.nhtsa.dot.gov/api")
                 .build();
     }

@@ -1,7 +1,6 @@
 package com.nawaf.capstone3.Controller;
 
 import com.nawaf.capstone3.DTO.ReceiptDTO;
-import com.nawaf.capstone3.Model.Receipt;
 import com.nawaf.capstone3.Service.ReceiptAiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +17,6 @@ public class ReceiptAiController {
     @PostMapping("/add/{maintenanceRecordId}")
     public ResponseEntity<ReceiptDTO> addReceiptFromImage(@PathVariable Integer maintenanceRecordId, @RequestParam("image") MultipartFile image) {
         ReceiptDTO receiptDTO = receiptAiService.analyzeAndSaveReceipt(maintenanceRecordId, image);
-        return ResponseEntity.ok(receiptDTO);
+        return ResponseEntity.status(201).body(receiptDTO);
     }
 }

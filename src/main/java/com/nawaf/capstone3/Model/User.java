@@ -1,6 +1,7 @@
 package com.nawaf.capstone3.Model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -52,17 +53,13 @@ public class User {
     private String phoneNumber;
 
     @NotEmpty(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters")
-    @Pattern(
-            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).+$",
-            message = "Password must contain uppercase, lowercase, number, and special character"
-    )
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private Set<Vehicle> vehicles;
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<Vehicle> vehicles = new java.util.LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private Set<Notification> notifications;
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<Notification> notifications = new java.util.LinkedHashSet<>();
 }

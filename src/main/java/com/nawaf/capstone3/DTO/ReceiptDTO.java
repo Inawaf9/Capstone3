@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import jakarta.validation.constraints.*;
 import java.util.List;
 
 @Getter
@@ -15,7 +15,10 @@ import java.util.List;
 @NoArgsConstructor
 public class ReceiptDTO {
 
+    @NotNull @PositiveOrZero
     private Double totalAmount;
+    @NotNull @PastOrPresent
     private LocalDate extractedDate;
-   private List<String> services;
+    @Size(max = 100)
+    private List<@NotBlank @Size(max = 200) String> services;
 }

@@ -1,14 +1,18 @@
 package com.nawaf.capstone3.Repository;
 
 import com.nawaf.capstone3.Model.Notification;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
+import jakarta.persistence.LockModeType;
+import java.util.List;
 
-@Repository
 public interface NotificationRepository extends JpaRepository<Notification, Integer> {
-
     Notification findNotificationById(Integer id);
-    Notification findTopByMaintenanceRecordIdAndStatusOrderBySentAtDesc(Integer maintenanceRecordId, String status);
-    Notification findTopByMaintenanceRecordIdAndStatus(Integer maintenanceRecordId, String status);
-    Notification findTopByMaintenanceRecordVehicleIdAndTypeOrderBySentAtDesc(Integer vehicleId, String type);
+    Notification findTopByUserIdAndMessageStartingWithOrderByIdDesc(Integer userId, String prefix);
+    boolean existsByUserIdAndMessageStartingWith(Integer userId, String prefix);
+    List<Notification> findByUserId(Integer userId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select n from Notification n where n.id = :id")
+    Notification findNotificationForUpdate(@Param("id") Integer id);
 }

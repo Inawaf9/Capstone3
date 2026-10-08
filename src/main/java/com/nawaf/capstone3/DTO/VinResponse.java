@@ -7,5 +7,6 @@ import java.util.List;
 @Data
 public class VinResponse {
 
-    private List<VinResult> Results;
+    @com.fasterxml.jackson.annotation.JsonProperty("Results")
+    private List<VinResult> results;
 }
