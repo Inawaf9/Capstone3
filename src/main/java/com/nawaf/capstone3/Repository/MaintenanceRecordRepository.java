@@ -25,4 +25,6 @@ public interface MaintenanceRecordRepository extends JpaRepository<MaintenanceRe
     Double getTotalCostByVehicleAndYear(@Param("vehicleId") Integer vehicleId, @Param("year") Integer year);
     MaintenanceRecord findTopByVehicleIdOrderByServiceDateDesc(Integer vehicleId);
 
+
+    boolean existsByMaintenanceRule_UserManual_Id(Integer manualId);
 }

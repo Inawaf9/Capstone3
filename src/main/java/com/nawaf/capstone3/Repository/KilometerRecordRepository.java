@@ -1,6 +1,10 @@
 package com.nawaf.capstone3.Repository;
 
 import com.nawaf.capstone3.Model.KilometerRecord;
+<<<<<<< Updated upstream
+=======
+import com.nawaf.capstone3.Model.User;
+>>>>>>> Stashed changes
 import com.nawaf.capstone3.Model.Vehicle;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -13,6 +17,7 @@ public interface KilometerRecordRepository extends JpaRepository<KilometerRecord
 
     KilometerRecord findKilometerRecordById(Integer id);
 
+<<<<<<< Updated upstream
     KilometerRecord findKilometerRecordByIdAndVehicle(Integer id, Vehicle vehicle);
 
     List<KilometerRecord> findKilometerRecordsByVehicle(Vehicle vehicle);
@@ -22,4 +27,7 @@ public interface KilometerRecordRepository extends JpaRepository<KilometerRecord
     List<KilometerRecord> findAllByVehicleOrderByRecordedAtDesc(Vehicle vehicle);
 
     List<KilometerRecord> findAllByVehicleAndRecordedAtBetweenOrderByRecordedAtAsc(Vehicle vehicle, LocalDateTime start, LocalDateTime end);
+=======
+
+>>>>>>> Stashed changes
 }

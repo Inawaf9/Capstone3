@@ -16,8 +16,30 @@ public class MaintenanceRuleController {
     private final MaintenanceRuleService maintenanceRuleService;
 
     @GetMapping("/get-all")
+<<<<<<< Updated upstream
     public ResponseEntity<?> getMaintenanceRules() {
         return ResponseEntity.status(200).body(maintenanceRuleService.getMaintenanceRules());
+=======
+    public ResponseEntity<?>getAll() {
+        List<MaintenanceRule> maintenanceRuleList = maintenanceRuleService.getAll();
+        return ResponseEntity.status(200).body(maintenanceRuleList);
+    }
+    @GetMapping("/get/{maintenanceRuleId}")
+    public ResponseEntity<?>getMaintenanceRuleById(@PathVariable Integer maintenanceRuleId) {
+       MaintenanceRule maintenanceRule=maintenanceRuleService.getMaintenanceRuleById(maintenanceRuleId);
+       return ResponseEntity.status(200).body(maintenanceRule);
+    }
+
+    @PostMapping("/add")
+    public ResponseEntity<?>addMaintenanceRule(@RequestBody MaintenanceRule maintenanceRule){
+        maintenanceRuleService.addMaintenanceRule(maintenanceRule);
+        return ResponseEntity.status(200).body(new ApiResponse("added successfully"));
+    }
+    @PutMapping("/update/{maintenanceRuleId}")
+    public ResponseEntity<?>updateMaintenanceRule(@PathVariable Integer maintenanceRuleId,@RequestBody MaintenanceRule maintenanceRule){
+        maintenanceRuleService.updateMaintenanceRule(maintenanceRuleId, maintenanceRule);
+        return ResponseEntity.status(200).body(new ApiResponse("updated successfully"));
+>>>>>>> Stashed changes
     }
 
     @GetMapping("/get/{id}")

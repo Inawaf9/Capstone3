@@ -51,6 +51,7 @@ public class MaintenanceRuleService {
         MaintenanceRule maintenanceRule = maintenanceRuleRepository.findMaintenanceRuleById(id);
         if (maintenanceRule == null) throw new ApiException("Maintenance rule not found");
 
+<<<<<<< Updated upstream
         maintenanceRule.setServiceName(updateMaintenanceRule.getServiceName());
         maintenanceRule.setDescription(updateMaintenanceRule.getDescription());
         maintenanceRule.setCategory(updateMaintenanceRule.getCategory());
@@ -61,7 +62,14 @@ public class MaintenanceRuleService {
         maintenanceRule.setSpecification(updateMaintenanceRule.getSpecification());
         maintenanceRule.setCapacity(updateMaintenanceRule.getCapacity());
         maintenanceRule.setNotes(updateMaintenanceRule.getNotes());
+<<<<<<< HEAD
+=======
+
+        maintenanceRuleRepository.save(oldMaintenanceRule);
+>>>>>>> Stashed changes
+=======
         maintenanceRule.setSource(updateMaintenanceRule.getSource());
+>>>>>>> 73bfbe3d4ed326a5e0049a12bb6d3162b22cdea4
 
         maintenanceRuleRepository.save(maintenanceRule);
     }
@@ -72,4 +80,23 @@ public class MaintenanceRuleService {
 
         maintenanceRuleRepository.delete(maintenanceRule);
     }
+<<<<<<< HEAD
+<<<<<<< Updated upstream
+=======
+
+    public MaintenanceRule getMaintenanceRuleById(Integer maintenanceRuleId){
+        MaintenanceRule maintenanceRule=maintenanceRuleRepository.findMaintenanceRuleById(maintenanceRuleId);
+        if(maintenanceRule==null){
+            throw new ApiException("maintenance rule id not found");
+        }
+        return maintenanceRule;
+    }
+
+//    public void
+
+
+>>>>>>> Stashed changes
 }
+=======
+}
+>>>>>>> 73bfbe3d4ed326a5e0049a12bb6d3162b22cdea4

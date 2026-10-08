@@ -55,7 +55,11 @@ public class MaintenanceRule {
     private Integer monthInterval;
 
     @Size(max = 500, message = "Condition must not exceed 500 characters")
+<<<<<<< Updated upstream
     @Column(name = "maintenance_condition", length = 500)
+=======
+    @Column(length = 500,name = "rule_condition")//عدلت الاسم عشان ما يكون فيه مشكلة بقاعدة البيانات
+>>>>>>> Stashed changes
     private String condition;
 
     @Size(max = 500, message = "Specification must not exceed 500 characters")
@@ -80,5 +84,8 @@ public class MaintenanceRule {
     private Vehicle vehicle;
 
     @OneToMany(mappedBy = "maintenanceRule")
+    @JsonIgnore//هيصير تكرار لانهائي لو حذفناها داخل تحليل ال Ai
     private Set<MaintenanceRecord> maintenanceRecords;
+
+
 }
