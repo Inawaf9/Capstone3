@@ -15,7 +15,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class MaintenanceRecordService {
-
     private final MaintenanceRecordRepository maintenanceRecordRepository;
     private final VehicleRepository vehicleRepository;
     private final MaintenanceRuleRepository maintenanceRuleRepository;
@@ -26,7 +25,6 @@ public class MaintenanceRecordService {
 
     public MaintenanceRecord getMaintenanceRecordById(Integer id) {
         MaintenanceRecord maintenanceRecord = maintenanceRecordRepository.findMaintenanceRecordById(id);
-
         if (maintenanceRecord == null) throw new ApiException("Maintenance record not found");
 
         return maintenanceRecord;
@@ -34,11 +32,12 @@ public class MaintenanceRecordService {
 
     public void addMaintenanceRecord(Integer vehicleId, Integer maintenanceRuleId, MaintenanceRecord maintenanceRecord) {
         Vehicle vehicle = vehicleRepository.findVehicleById(vehicleId);
-        MaintenanceRule maintenanceRule = maintenanceRuleRepository.findMaintenanceRuleById(maintenanceRuleId);
-
         if (vehicle == null) throw new ApiException("Vehicle not found");
+
+        MaintenanceRule maintenanceRule = maintenanceRuleRepository.findMaintenanceRuleById(maintenanceRuleId);
         if (maintenanceRule == null) throw new ApiException("Maintenance rule not found");
-        if (!maintenanceRule.getUserManual().getVehicle().getId().equals(vehicleId)) throw new ApiException("Maintenance rule does not belong to this vehicle");
+
+        if (!maintenanceRule.getVehicle().getId().equals(vehicleId)) throw new ApiException("Maintenance rule does not belong to this vehicle");
 
         maintenanceRecord.setVehicle(vehicle);
         maintenanceRecord.setMaintenanceRule(maintenanceRule);
@@ -48,7 +47,6 @@ public class MaintenanceRecordService {
 
     public void updateMaintenanceRecord(Integer id, MaintenanceRecord updateMaintenanceRecord) {
         MaintenanceRecord maintenanceRecord = maintenanceRecordRepository.findMaintenanceRecordById(id);
-
         if (maintenanceRecord == null) throw new ApiException("Maintenance record not found");
 
         maintenanceRecord.setKilometers(updateMaintenanceRecord.getKilometers());
@@ -62,9 +60,17 @@ public class MaintenanceRecordService {
 
     public void deleteMaintenanceRecord(Integer id) {
         MaintenanceRecord maintenanceRecord = maintenanceRecordRepository.findMaintenanceRecordById(id);
-
         if (maintenanceRecord == null) throw new ApiException("Maintenance record not found");
 
         maintenanceRecordRepository.delete(maintenanceRecord);
+    }
+
+    //get by       id
+    public MaintenanceRecord getMaintenanceRecordById(Integer maintenanceRecordId){
+        MaintenanceRecord maintenanceRecord=maintenanceRecordRepository.findMaintenanceRecordById(maintenanceRecordId);
+        if(maintenanceRecord==null){
+            throw new ApiException("maintenance record ID not found");
+        }
+        return maintenanceRecord;
     }
 }

@@ -16,8 +16,19 @@ public class MaintenanceRecordController {
     private final MaintenanceRecordService maintenanceRecordService;
 
     @GetMapping("/get-all")
+<<<<<<< Updated upstream
     public ResponseEntity<?> getMaintenanceRecords() {
         return ResponseEntity.status(200).body(maintenanceRecordService.getMaintenanceRecords());
+=======
+    public ResponseEntity<?> getAll(){
+        List<MaintenanceRecord> maintenanceRecordList=maintenanceRecordService.getAll();
+        return ResponseEntity.status(200).body(maintenanceRecordList);
+>>>>>>> Stashed changes
+    }
+    @GetMapping("/get/{maintenanceRecordId}")
+    public ResponseEntity<?>getMaintenanceRecordById(@PathVariable Integer maintenanceRecordId){
+        MaintenanceRecord maintenanceRecord=maintenanceRecordService.getMaintenanceRecordById(maintenanceRecordId);
+        return ResponseEntity.status(200).body(new ApiResponse(""+maintenanceRecord));
     }
 
     @GetMapping("/get/{id}")

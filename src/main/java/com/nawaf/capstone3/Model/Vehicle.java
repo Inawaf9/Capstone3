@@ -7,7 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Getter
@@ -54,6 +56,10 @@ public class Vehicle {
     @PositiveOrZero(message = "Current kilometers cannot be negative")
     private Integer currentKilometers;
 
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
@@ -69,5 +75,5 @@ public class Vehicle {
     private Set<MaintenanceRecord> maintenanceRecords;
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
-    private Set<UserManual> userManuals;
+    private Set<MaintenanceRule> maintenanceRules;
 }
